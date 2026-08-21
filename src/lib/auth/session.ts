@@ -1,28 +1,44 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { DEMO_COOKIE, demoProfile, type DemoRole } from "@/lib/auth/demo";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/supabase/database.types";
 
 export const ORG_VERIFIED_COOKIE = "haven-org-verified";
 export const REVIEW_COOKIE = "haven-review";
 
-export async function getProfile(): Promise<Profile | null> {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const userId = data?.claims?.sub;
+async function getDemoRole(): Promise<DemoRole | null> {
+  const cookieStore = await cookies();
+  const value = cookieStore.get(DEMO_COOKIE)?.value;
+  return value === "participant" || value === "organization" ? value : null;
+}
 
-  if (typeof userId !== "string") {
-    return null;
+export async function getProfile(): Promise<Profile | null> {
+  const demoRole = await getDemoRole();
+  if (demoRole) {
+    return demoProfile(demoRole);
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getClaims();
+    const userId = data?.claims?.sub;
 
-  return profile;
+    if (typeof userId !== "string") {
+      return null;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
+
+    return profile;
+  } catch {
+    return null;
+  }
 }
 
 export async function requireParticipant() {

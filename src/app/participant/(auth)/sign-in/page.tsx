@@ -1,7 +1,8 @@
+import { redirect } from "next/navigation";
+
 import { AuthFrame, AuthLinks, TextLink } from "@/components/auth/auth-frame";
 import { ParticipantSignInForm } from "@/components/auth/participant-forms";
 import { getProfile } from "@/lib/auth/session";
-import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Participant sign in",
@@ -17,10 +18,6 @@ export default async function ParticipantSignInPage({
 
   if (profile?.role === "participant") {
     redirect("/participant");
-  }
-
-  if (profile?.role === "pending_organization" || profile?.role === "organization") {
-    redirect("/organization/status");
   }
 
   return (

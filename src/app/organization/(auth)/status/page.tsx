@@ -1,7 +1,10 @@
+import { redirect } from "next/navigation";
+
 import { AuthFrame, AuthLinks, TextLink } from "@/components/auth/auth-frame";
 import { OrganizationStatusForm } from "@/components/auth/organization-forms";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth/actions";
+import { isDemoProfile } from "@/lib/auth/demo";
 import { getProfile } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,6 +14,10 @@ export const metadata = {
 
 export default async function OrganizationStatusPage() {
   const profile = await getProfile();
+
+  if (profile && isDemoProfile(profile)) {
+    redirect(profile.role === "participant" ? "/participant" : "/organization");
+  }
 
   if (!profile || profile.role === "participant") {
     return (

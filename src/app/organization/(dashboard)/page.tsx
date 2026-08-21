@@ -10,18 +10,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { NeedBadge, UrgencyBadge } from "@/components/status-badges";
+import { demoOrganization, isDemoProfile } from "@/lib/auth/demo";
 import { requireOrganization } from "@/lib/auth/session";
 import { incomingRequests, orgStats, programs } from "@/lib/placeholder";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function OrganizationOverviewPage() {
   const profile = await requireOrganization();
-  const supabase = await createClient();
-  const { data: organization } = await supabase
-    .from("organizations")
-    .select("name, location")
-    .eq("owner_id", profile.id)
-    .maybeSingle();
+  let organization: { name: string; location: string } | null = null;
+
+  if (isDemoProfile(profile)) {
+    organization = demoOrganization();
+  } else {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("organizations")
+      .select("name, location")
+      .eq("owner_id", profile.id)
+      .maybeSingle();
+    organization = data;
+  }
 
   const waiting = incomingRequests.filter(
     (request) => request.status === "pending",

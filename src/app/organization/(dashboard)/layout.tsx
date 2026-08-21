@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
-import { requireOrganization } from "@/lib/auth/session";
 import { OrgShell } from "@/components/organization/org-shell";
+import { demoOrganization, isDemoProfile } from "@/lib/auth/demo";
+import { requireOrganization } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function OrganizationDashboardLayout({
@@ -10,6 +11,19 @@ export default async function OrganizationDashboardLayout({
   children: ReactNode;
 }) {
   const profile = await requireOrganization();
+
+  if (isDemoProfile(profile)) {
+    const organization = demoOrganization();
+    return (
+      <OrgShell
+        organizationName={organization.name}
+        location={organization.location}
+      >
+        {children}
+      </OrgShell>
+    );
+  }
+
   const supabase = await createClient();
   const { data: organization } = await supabase
     .from("organizations")

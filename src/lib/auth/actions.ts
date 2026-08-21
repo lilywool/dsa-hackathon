@@ -3,6 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { DEMO_COOKIE, matchDemoAccount, type DemoRole } from "@/lib/auth/demo";
 import { ORG_VERIFIED_COOKIE, REVIEW_COOKIE } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import type { ServiceKind } from "@/lib/supabase/database.types";
@@ -60,11 +61,42 @@ function cookieOptions() {
   };
 }
 
+async function setDemoRole(role: DemoRole | null) {
+  const cookieStore = await cookies();
+  if (role) {
+    cookieStore.set(DEMO_COOKIE, role, {
+      ...cookieOptions(),
+      maxAge: 60 * 60 * 8,
+    });
+    return;
+  }
+
+  cookieStore.delete(DEMO_COOKIE);
+}
+
+async function completeDemoSignIn(role: DemoRole): Promise<never> {
+  try {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+  } catch {
+    // Auth may be down; demo login should still open the dashboard.
+  }
+
+  await setDemoRole(role);
+  redirect(role === "organization" ? "/organization" : "/participant");
+}
+
 export async function signOut() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  try {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+  } catch {
+    // Auth may be down; still clear local demo session cookies.
+  }
+
   const cookieStore = await cookies();
   cookieStore.delete(ORG_VERIFIED_COOKIE);
+  cookieStore.delete(DEMO_COOKIE);
   redirect("/");
 }
 
@@ -114,6 +146,11 @@ export async function signInParticipant(
     return { error: "Enter your email and password." };
   }
 
+  const demoRole = matchDemoAccount(email, password);
+  if (demoRole) {
+    await completeDemoSignIn(demoRole);
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -126,6 +163,7 @@ export async function signInParticipant(
     return { error: signInErrorMessage("Invalid login credentials") };
   }
 
+  await setDemoRole(null);
   const profile = await profileForUser(supabase, userId);
 
   if (profile?.role === "organization") {
@@ -220,6 +258,11 @@ export async function signInOrganization(
     return { error: "Enter your email and password." };
   }
 
+  const demoRole = matchDemoAccount(email, password);
+  if (demoRole) {
+    await completeDemoSignIn(demoRole);
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -232,6 +275,7 @@ export async function signInOrganization(
     return { error: signInErrorMessage("Invalid login credentials") };
   }
 
+  await setDemoRole(null);
   const profile = await profileForUser(supabase, userId);
 
   if (profile?.role === "participant") {
@@ -321,6 +365,11 @@ export async function signInToCheckStatus(
     return { error: "Enter the email and password from your application." };
   }
 
+  const demoRole = matchDemoAccount(email, password);
+  if (demoRole) {
+    await completeDemoSignIn(demoRole);
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -333,6 +382,7 @@ export async function signInToCheckStatus(
     return { error: signInErrorMessage("Invalid login credentials") };
   }
 
+  await setDemoRole(null);
   const profile = await profileForUser(supabase, userId);
 
   if (profile?.role === "participant") {
