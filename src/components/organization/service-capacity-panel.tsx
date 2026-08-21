@@ -26,13 +26,16 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   availabilityLabels,
+  CAPACITY_JITTER,
   enrichCapacityRows,
   formatVacancyLabel,
   groupCapacityByService,
   shortOrgLabel,
+  unfilledSupportAlert,
   vacancySummary,
   type AvailabilityStatus,
   type CapacityAvailabilityRow,
+  type ExplicitServiceIndex,
 } from "@/lib/data/capacity-availability";
 import { formatCapacityValue } from "@/lib/data/org-capacity-match";
 import type { CapacityConfidence, OrgCapacityRow } from "@/lib/data/types";
@@ -89,11 +92,12 @@ function ServiceCapacityTable({
 
   return (
     <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
-      <table className="w-full min-w-[640px] text-left text-sm">
+      <table className="w-full min-w-[720px] text-left text-sm">
         <thead className="border-b bg-muted/40 text-xs text-muted-foreground">
           <tr>
             <th className="px-3 py-2.5 font-medium">Organization</th>
-            <th className="px-3 py-2.5 font-medium">Published capacity</th>
+            <th className="px-3 py-2.5 font-medium">Live capacity</th>
+            <th className="px-3 py-2.5 font-medium">Simulated need</th>
             <th className="px-3 py-2.5 font-medium">Open now</th>
             <th className="px-3 py-2.5 font-medium">Status</th>
             <th className="px-3 py-2.5 font-medium">Confidence</th>
@@ -131,6 +135,7 @@ function ServiceCapacityTable({
                       <Progress value={fillPct} className="h-1.5" />
                       <p className="text-[11px] text-muted-foreground">
                         {fillPct}% occupied · {row.displayUnit}
+                        {row.vacancySimulated ? " · simulated" : ""}
                       </p>
                     </div>
                   ) : (
@@ -144,10 +149,17 @@ function ServiceCapacityTable({
                     {formatCapacityValue(row.displayTotal)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {row.capacity_unit !== row.displayUnit
-                      ? `from ${formatCapacityValue(row.capacity_value)} ${row.capacity_unit}`
-                      : row.capacity_unit}
+                    avg {formatCapacityValue(row.baselineTotal)}
+                    {row.displayTotal !== row.baselineTotal
+                      ? ` · ${row.displayTotal > row.baselineTotal ? "+" : ""}${row.displayTotal - row.baselineTotal}`
+                      : ""}
                   </p>
+                </td>
+                <td className="px-3 py-3 align-top tabular-nums">
+                  <p className="font-medium">
+                    {formatCapacityValue(row.displayNeed)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{row.unitNoun}</p>
                 </td>
                 <td className="px-3 py-3 align-top tabular-nums">
                   <p
@@ -202,6 +214,7 @@ function ServiceCapacityChart({ rows }: { rows: CapacityAvailabilityRow[] }) {
           fullName: row.organization,
           capacity: row.displayTotal,
           open: row.displayVacancies ?? 0,
+          need: row.displayNeed,
           status: row.status,
           unit: row.displayUnit,
         })),
@@ -234,7 +247,7 @@ function ServiceCapacityChart({ rows }: { rows: CapacityAvailabilityRow[] }) {
           />
           <YAxis tick={{ fontSize: 10 }} width={48}>
             <Label
-              value="Capacity / open slots"
+              value="Capacity / open / need"
               angle={-90}
               position="insideLeft"
               style={{
@@ -255,7 +268,12 @@ function ServiceCapacityChart({ rows }: { rows: CapacityAvailabilityRow[] }) {
                 typeof value === "number" ? value : Number(value ?? 0);
               const unit =
                 (item?.payload as { unit?: string } | undefined)?.unit ?? "";
-              const label = name === "open" ? "Open now" : "Capacity";
+              const label =
+                name === "open"
+                  ? "Open now"
+                  : name === "need"
+                    ? "Need"
+                    : "Capacity";
               return [`${formatCapacityValue(numeric)} ${unit}`, label];
             }}
             labelFormatter={(_, payload) => {
@@ -280,6 +298,15 @@ function ServiceCapacityChart({ rows }: { rows: CapacityAvailabilityRow[] }) {
               <Cell
                 key={`open-${entry.fullName}`}
                 fill={barFillByStatus[entry.status]}
+              />
+            ))}
+          </Bar>
+          <Bar dataKey="need" name="Need" radius={[4, 4, 0, 0]}>
+            {data.map((entry) => (
+              <Cell
+                key={`need-${entry.fullName}`}
+                fill="oklch(0.55 0.06 250)"
+                fillOpacity={0.55}
               />
             ))}
           </Bar>
@@ -349,16 +376,49 @@ function ReferralCallout({
   );
 }
 
+function UnfilledAlert({ rows }: { rows: CapacityAvailabilityRow[] }) {
+  const alert = unfilledSupportAlert(rows);
+  if (!alert) {
+    return null;
+  }
+
+  return (
+    <div
+      role="status"
+      className="rounded-xl bg-[oklch(0.96_0.04_75)] px-4 py-3 ring-1 ring-[oklch(0.82_0.08_70)]"
+    >
+      <p className="text-xs font-medium uppercase tracking-wide text-[oklch(0.42_0.08_55)]">
+        Alert
+      </p>
+      <p className="mt-0.5 font-heading text-lg tracking-tight text-foreground">
+        {alert.message}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Live snapshot for this service filter — capacity, need, and vacancies
+        refresh when you change the filter.
+      </p>
+    </div>
+  );
+}
+
 export function ServiceCapacityPanel({
   capacity,
   currentOrgName,
   defaultService,
+  explicitOffers,
 }: {
   capacity: OrgCapacityRow[];
   currentOrgName?: string | null;
   defaultService?: ServiceKind | null;
+  explicitOffers?: ExplicitServiceIndex | null;
 }) {
-  const enriched = useMemo(() => enrichCapacityRows(capacity), [capacity]);
+  const [active, setActive] = useState<ServiceKind | null>(null);
+  const [refreshSeed, setRefreshSeed] = useState(0);
+
+  const enriched = useMemo(
+    () => enrichCapacityRows(capacity, String(refreshSeed), explicitOffers),
+    [capacity, refreshSeed, explicitOffers],
+  );
   const byService = useMemo(
     () => groupCapacityByService(enriched),
     [enriched],
@@ -368,16 +428,19 @@ export function ServiceCapacityPanel({
     (service) => (byService.get(service)?.length ?? 0) > 0,
   );
 
-  const initial =
-    defaultService && servicesWithRows.includes(defaultService)
-      ? defaultService
-      : (servicesWithRows[0] ?? "shelter");
-
-  const [active, setActive] = useState<ServiceKind>(initial);
+  const resolvedActive =
+    active && servicesWithRows.includes(active)
+      ? active
+      : defaultService && servicesWithRows.includes(defaultService)
+        ? defaultService
+        : (servicesWithRows[0] ?? "shelter");
 
   if (servicesWithRows.length === 0) {
     return null;
   }
+
+  const activeRows = byService.get(resolvedActive) ?? [];
+  const summary = vacancySummary(activeRows);
 
   return (
     <Card>
@@ -386,16 +449,44 @@ export function ServiceCapacityPanel({
           Service capacity &amp; vacancies
         </CardTitle>
         <CardDescription>
-          Same published capacity figures shown on the need map (HIGH sites as
-          teal dots), grouped by service. Occupancy and open beds/meals are a
-          demo availability layer so full organizations can spot peers who can
-          take a referral.
+          Organizations that explicitly offer each service, with a live-style
+          capacity snapshot (±20 of published averages). Need and vacancies
+          re-roll when you change the service filter.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 pt-5">
+        <div className="space-y-2">
+          <label
+            htmlFor="capacity-service-filter"
+            className="text-xs font-medium text-muted-foreground"
+          >
+            Filter by service offered
+          </label>
+          <select
+            id="capacity-service-filter"
+            className="flex h-10 w-full max-w-md rounded-lg border border-foreground/10 bg-background px-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-primary/30"
+            value={resolvedActive}
+            onChange={(event) => {
+              const next = event.target.value as ServiceKind;
+              setActive(next);
+              setRefreshSeed((seed) => seed + 1);
+            }}
+          >
+            {servicesWithRows.map((service) => (
+              <option key={service} value={service}>
+                {serviceShortLabels[service]} (
+                {byService.get(service)?.length ?? 0})
+              </option>
+            ))}
+          </select>
+        </div>
+
         <Tabs
-          value={active}
-          onValueChange={(value) => setActive(value as ServiceKind)}
+          value={resolvedActive}
+          onValueChange={(value) => {
+            setActive(value as ServiceKind);
+            setRefreshSeed((seed) => seed + 1);
+          }}
         >
           <TabsList variant="line" className="flex h-auto w-full flex-wrap">
             {servicesWithRows.map((service) => (
@@ -408,53 +499,50 @@ export function ServiceCapacityPanel({
             ))}
           </TabsList>
 
-          {servicesWithRows.map((service) => {
-            const rows = byService.get(service) ?? [];
-            const summary = vacancySummary(rows);
-            return (
-              <TabsContent key={service} value={service} className="space-y-4">
-                <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <span className="rounded-md bg-primary/10 px-2 py-1 text-primary ring-1 ring-primary/20">
-                    {summary.available} with vacancies
-                  </span>
-                  <span className="rounded-md bg-[oklch(0.92_0.05_85)] px-2 py-1 text-[oklch(0.38_0.06_70)] ring-1 ring-[oklch(0.8_0.05_80)]">
-                    {summary.limited} limited
-                  </span>
-                  <span className="rounded-md bg-destructive/10 px-2 py-1 text-destructive ring-1 ring-destructive/20">
-                    {summary.atCapacity} at capacity
-                  </span>
-                  <span className="rounded-md bg-muted px-2 py-1 ring-1 ring-foreground/10">
-                    {summary.unknown} modeled / unknown
-                  </span>
-                </div>
+          <TabsContent value={resolvedActive} className="space-y-4">
+            <UnfilledAlert rows={activeRows} />
 
-                <ReferralCallout
-                  rows={rows}
-                  currentOrgName={currentOrgName}
-                />
+            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+              <span className="rounded-md bg-primary/10 px-2 py-1 text-primary ring-1 ring-primary/20">
+                {summary.available} with vacancies
+              </span>
+              <span className="rounded-md bg-[oklch(0.92_0.05_85)] px-2 py-1 text-[oklch(0.38_0.06_70)] ring-1 ring-[oklch(0.8_0.05_80)]">
+                {summary.limited} limited
+              </span>
+              <span className="rounded-md bg-destructive/10 px-2 py-1 text-destructive ring-1 ring-destructive/20">
+                {summary.atCapacity} at capacity
+              </span>
+              <span className="rounded-md bg-muted px-2 py-1 ring-1 ring-foreground/10">
+                {summary.unknown} simulated from modeled data
+              </span>
+            </div>
 
-                <div className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
-                  <div className="rounded-xl bg-card p-3 ring-1 ring-foreground/10">
-                    <p className="mb-2 text-sm font-medium">
-                      Capacity vs open slots
-                    </p>
-                    <ServiceCapacityChart rows={rows} />
-                  </div>
-                  <ServiceCapacityTable
-                    rows={rows}
-                    currentOrgName={currentOrgName}
-                  />
-                </div>
-              </TabsContent>
-            );
-          })}
+            <ReferralCallout
+              rows={activeRows}
+              currentOrgName={currentOrgName}
+            />
+
+            <div className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
+              <div className="rounded-xl bg-card p-3 ring-1 ring-foreground/10">
+                <p className="mb-2 text-sm font-medium">
+                  Capacity vs open slots vs need
+                </p>
+                <ServiceCapacityChart rows={activeRows} />
+              </div>
+              <ServiceCapacityTable
+                rows={activeRows}
+                currentOrgName={currentOrgName}
+              />
+            </div>
+          </TabsContent>
         </Tabs>
 
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Vacancy estimates apply to HIGH/MEDIUM bed and meal figures only.
-          MODELED rows stay marked unknown — they are demand proxies, not live
-          inventory. Replace the demo occupancy layer with live bed/meal counts
-          when providers report them.
+          Live capacity is synthetic within ±{CAPACITY_JITTER} of each
+          organization&apos;s published daily average so the table can preview
+          real-time reporting.
+          LOW / MODELED rows still show simulated vacancies derived from those
+          baselines. Replace with provider-reported inventory when available.
         </p>
       </CardContent>
     </Card>

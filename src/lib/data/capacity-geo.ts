@@ -1,54 +1,166 @@
+import { capacityEnumToService } from "@/lib/data/org-capacity-match";
+import { distanceMeters, DOWNTOWN_CENTER } from "@/lib/data/geo";
 import type {
   FeatureCollection,
   OrgCapacityGeoProps,
 } from "@/lib/data/types";
+import type { ServiceKind } from "@/lib/services";
+
+export type CapacityMarkerShape =
+  | "circle"
+  | "square"
+  | "diamond"
+  | "triangle"
+  | "hexagon"
+  | "rounded";
 
 export type CapacitySiteMarker = {
   id: string;
   lat: number;
   lng: number;
   organization: string;
+  orgKey: string;
   insideDowntown: boolean;
-  rows: {
-    category: string;
-    value: number;
-    unit: string;
-  }[];
+  service: ServiceKind;
+  category: string;
+  categoryEnum: string;
+  capacityValue: number;
+  capacityUnit: string;
+  confidence: string;
+  /** Pixel radius for the map marker (capacity-scaled). */
+  radiusPx: number;
+  shape: CapacityMarkerShape;
 };
 
+const SHAPE_BY_SERVICE: Record<ServiceKind, CapacityMarkerShape> = {
+  shelter: "circle",
+  food: "square",
+  healthcare: "diamond",
+  employment: "triangle",
+  clothing: "hexagon",
+  other: "rounded",
+};
+
+/** Keep groupHighCapacitySites for any legacy callers — HIGH sites only. */
 export function groupHighCapacitySites(
   capacityGeo: FeatureCollection<OrgCapacityGeoProps>,
 ): CapacitySiteMarker[] {
-  const groups = new Map<string, CapacitySiteMarker>();
+  return buildCapacityMarkers(capacityGeo, "shelter").filter(
+    (site) => site.confidence === "HIGH",
+  );
+}
+
+function displayCapacityValue(value: number, unit: string) {
+  const lower = unit.toLowerCase();
+  if (lower.includes("meal") && (lower.includes("/year") || lower.includes("per year"))) {
+    return Math.max(1, Math.round(value / 365));
+  }
+  if (lower.includes("/month") || lower.includes("per month")) {
+    return Math.max(1, Math.round(value / 30));
+  }
+  return Math.max(1, Math.round(value));
+}
+
+function radiusFromCapacity(value: number, maxValue: number) {
+  const safeMax = Math.max(maxValue, 1);
+  const t = Math.min(1, Math.log10(value + 1) / Math.log10(safeMax + 1));
+  // Larger range so capacity differences stay readable at downtown zoom.
+  return Math.round(14 + t * 28);
+}
+
+/**
+ * Capacity providers for one service category. Includes published and modeled
+ * rows so each filter has markers; size scales with capacity within that set.
+ * Optionally limits to sites near downtown so the map stays legible.
+ */
+export function buildCapacityMarkers(
+  capacityGeo: FeatureCollection<OrgCapacityGeoProps>,
+  serviceFilter: ServiceKind,
+  options?: { maxDistanceMeters?: number },
+): CapacitySiteMarker[] {
+  const maxDistance = options?.maxDistanceMeters ?? 8_000;
+  const candidates: Array<{
+    lat: number;
+    lng: number;
+    organization: string;
+    orgKey: string;
+    insideDowntown: boolean;
+    service: ServiceKind;
+    category: string;
+    categoryEnum: string;
+    capacityValue: number;
+    capacityUnit: string;
+    confidence: string;
+  }> = [];
 
   for (const feature of capacityGeo.features) {
-    if (feature.properties.capacity_confidence !== "HIGH") {
-      continue;
-    }
     if (feature.geometry.type !== "Point") {
       continue;
     }
-    const [lng, lat] = feature.geometry.coordinates;
-    const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
-    const existing = groups.get(key);
-    const row = {
-      category: feature.properties.category,
-      value: feature.properties.capacity_value,
-      unit: feature.properties.capacity_unit,
-    };
-    if (existing) {
-      existing.rows.push(row);
+    if (feature.properties.org_wide_total_flag) {
       continue;
     }
-    groups.set(key, {
-      id: key,
+    const service = capacityEnumToService(feature.properties.category_enum);
+    if (!service || service !== serviceFilter) {
+      continue;
+    }
+
+    const [lng, lat] = feature.geometry.coordinates;
+    if (
+      distanceMeters(
+        { lat: DOWNTOWN_CENTER[0], lng: DOWNTOWN_CENTER[1] },
+        { lat, lng },
+      ) > maxDistance
+    ) {
+      continue;
+    }
+
+    candidates.push({
       lat,
       lng,
       organization: feature.properties.organization,
+      orgKey: feature.properties.org_key,
       insideDowntown: Boolean(feature.properties.inside_downtown_boundary),
-      rows: [row],
+      service,
+      category: feature.properties.category,
+      categoryEnum: feature.properties.category_enum,
+      capacityValue: displayCapacityValue(
+        feature.properties.capacity_value,
+        feature.properties.capacity_unit,
+      ),
+      capacityUnit: feature.properties.capacity_unit,
+      confidence: feature.properties.capacity_confidence,
     });
   }
 
-  return [...groups.values()];
+  const maxValue = candidates.reduce(
+    (max, row) => Math.max(max, row.capacityValue),
+    1,
+  );
+
+  return candidates.map((row) => ({
+    id: `${row.orgKey}:${row.categoryEnum}:${row.lat.toFixed(5)},${row.lng.toFixed(5)}`,
+    lat: row.lat,
+    lng: row.lng,
+    organization: row.organization,
+    orgKey: row.orgKey,
+    insideDowntown: row.insideDowntown,
+    service: row.service,
+    category: row.category,
+    categoryEnum: row.categoryEnum,
+    capacityValue: row.capacityValue,
+    capacityUnit: row.capacityUnit,
+    confidence: row.confidence,
+    radiusPx: radiusFromCapacity(row.capacityValue, maxValue),
+    shape: SHAPE_BY_SERVICE[row.service],
+  }));
 }
+
+export const capacityShapeLabels: Record<CapacityMarkerShape, string> = {
+  circle: "Shelter",
+  square: "Food",
+  diamond: "Health",
+  triangle: "Employment",
+  hexagon: "Clothes",
+  rounded: "Other",
+};

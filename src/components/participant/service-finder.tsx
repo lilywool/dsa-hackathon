@@ -174,15 +174,12 @@ export function ServiceFinder({ need }: Props) {
       });
   }, [sites, need, downtownOnly, accessibleOnly]);
 
-  useEffect(() => {
-    if (filtered.length === 0) {
-      setSelectedId(null);
-      return;
-    }
-    if (!selectedId || !filtered.some((site) => site.id === selectedId)) {
-      setSelectedId(filtered[0].id);
-    }
-  }, [filtered, selectedId]);
+  const effectiveSelectedId =
+    filtered.length === 0
+      ? null
+      : selectedId && filtered.some((site) => site.id === selectedId)
+        ? selectedId
+        : filtered[0].id;
 
   if (error) {
     return (
@@ -256,7 +253,7 @@ export function ServiceFinder({ need }: Props) {
       <ServiceFinderMap
         sites={filtered}
         accessibleStops={showTransit ? accessibleStops : []}
-        selectedId={selectedId}
+        selectedId={effectiveSelectedId}
         onSelect={setSelectedId}
       />
 
@@ -268,7 +265,7 @@ export function ServiceFinder({ need }: Props) {
           </li>
         ) : (
           filtered.slice(0, 12).map((site) => {
-            const active = site.id === selectedId;
+            const active = site.id === effectiveSelectedId;
             return (
               <li key={site.id}>
                 <button

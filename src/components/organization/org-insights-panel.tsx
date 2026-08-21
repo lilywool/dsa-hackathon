@@ -15,7 +15,6 @@ import {
 } from "recharts";
 import { Pause, Play } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,25 +29,44 @@ import {
   neighborhoodForecastKey,
 } from "@/lib/data/forecast";
 import {
-  groupHighCapacitySites,
+  buildSimulatedBlockPitMap,
+  maxBlockPit,
+} from "@/lib/data/block-need";
+import {
+  buildCapacityMarkers,
   type CapacitySiteMarker,
 } from "@/lib/data/capacity-geo";
+import {
+  buildExplicitServiceIndex,
+  type ExplicitServiceIndex,
+} from "@/lib/data/capacity-availability";
 import { ServiceCapacityPanel } from "@/components/organization/service-capacity-panel";
-import { needColorScale } from "@/lib/data/geo";
 import {
   loadBlockNeedHeatmap,
   loadNeighborhoodTrend,
   loadOrgCapacity,
   loadOrgCapacityGeo,
+  loadServiceLocations,
+  loadTransitAccessibility,
 } from "@/lib/data/load";
+import {
+  buildTransitCorridors,
+  extractTransitStops,
+  type TransitCorridor,
+  type TransitStopPoint,
+} from "@/lib/data/transit-corridors";
 import type {
-  CapacityConfidence,
   FeatureCollection,
   ForecastPoint,
   NeighborhoodTrendProps,
+  OrgCapacityGeoProps,
   OrgCapacityRow,
 } from "@/lib/data/types";
-import type { ServiceKind } from "@/lib/services";
+import {
+  SERVICE_KINDS,
+  serviceShortLabels,
+  type ServiceKind,
+} from "@/lib/services";
 import { cn } from "@/lib/utils";
 
 const ForecastChoropleth = dynamic(
@@ -66,21 +84,6 @@ const ForecastChoropleth = dynamic(
   },
 );
 
-const CONFIDENCE_ORDER: CapacityConfidence[] = [
-  "HIGH",
-  "MEDIUM",
-  "LOW",
-  "MODELED_FALLBACK",
-];
-
-const confidenceStyles: Record<CapacityConfidence, string> = {
-  HIGH: "bg-primary/15 text-primary ring-primary/25",
-  MEDIUM: "bg-[oklch(0.92_0.05_85)] text-[oklch(0.38_0.06_70)] ring-[oklch(0.8_0.05_80)]",
-  LOW: "bg-destructive/10 text-destructive ring-destructive/20",
-  MODELED_FALLBACK:
-    "bg-muted text-muted-foreground ring-foreground/10",
-};
-
 export function OrgInsightsPanel({
   organizationName,
   primaryServices = [],
@@ -95,28 +98,47 @@ export function OrgInsightsPanel({
       null,
     );
   const [capacity, setCapacity] = useState<OrgCapacityRow[]>([]);
-  const [highCapacitySites, setHighCapacitySites] = useState<
-    CapacitySiteMarker[]
-  >([]);
+  const [capacityGeo, setCapacityGeo] =
+    useState<FeatureCollection<OrgCapacityGeoProps> | null>(null);
+  const [transitStops, setTransitStops] = useState<TransitStopPoint[]>([]);
+  const [transitCorridors, setTransitCorridors] = useState<TransitCorridor[]>(
+    [],
+  );
+  const [explicitOffers, setExplicitOffers] =
+    useState<ExplicitServiceIndex | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedNeighborhood, setSelectedNeighborhood] =
     useState<string>("East Village");
-  const [monthIndex, setMonthIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [excludeNoPanel, setExcludeNoPanel] = useState(true);
-  const [showHighCapacity, setShowHighCapacity] = useState(true);
+  const [showCapacity, setShowCapacity] = useState(true);
+  const [showTransit, setShowTransit] = useState(true);
+  const [mapServiceFilter, setMapServiceFilter] = useState<ServiceKind>(
+    () => primaryServices[0] ?? "shelter",
+  );
+  /** When set, keeps the user's scrubbed month for the active neighborhood. */
+  const [scrubbedMonth, setScrubbedMonth] = useState<{
+    neighborhood: string;
+    index: number;
+  } | null>(null);
 
   const onLoaded = useEffectEvent(
     (payload: {
       neighborhoods: FeatureCollection<NeighborhoodTrendProps>;
       blocks: FeatureCollection<import("@/lib/data/types").BlockNeedProps>;
       capacity: OrgCapacityRow[];
-      highCapacitySites: CapacitySiteMarker[];
+      capacityGeo: FeatureCollection<OrgCapacityGeoProps>;
+      transitStops: TransitStopPoint[];
+      transitCorridors: TransitCorridor[];
+      explicitOffers: ExplicitServiceIndex;
     }) => {
       setNeighborhoods(payload.neighborhoods);
       setBlocks(payload.blocks);
       setCapacity(payload.capacity);
-      setHighCapacitySites(payload.highCapacitySites);
+      setCapacityGeo(payload.capacityGeo);
+      setTransitStops(payload.transitStops);
+      setTransitCorridors(payload.transitCorridors);
+      setExplicitOffers(payload.explicitOffers);
       const names = payload.neighborhoods.features.map(
         (feature) => feature.properties.neighborhood,
       );
@@ -135,18 +157,33 @@ export function OrgInsightsPanel({
       loadBlockNeedHeatmap(),
       loadOrgCapacity(),
       loadOrgCapacityGeo(),
+      loadServiceLocations(),
+      loadTransitAccessibility(),
     ])
-      .then(([neighborhoodData, blockData, capacityData, capacityGeo]) => {
-        if (cancelled) {
-          return;
-        }
-        onLoaded({
-          neighborhoods: neighborhoodData,
-          blocks: blockData,
-          capacity: capacityData,
-          highCapacitySites: groupHighCapacitySites(capacityGeo),
-        });
-      })
+      .then(
+        ([
+          neighborhoodData,
+          blockData,
+          capacityData,
+          capacityGeoData,
+          serviceLocations,
+          transitGeo,
+        ]) => {
+          if (cancelled) {
+            return;
+          }
+          const stops = extractTransitStops(transitGeo);
+          onLoaded({
+            neighborhoods: neighborhoodData,
+            blocks: blockData,
+            capacity: capacityData,
+            capacityGeo: capacityGeoData,
+            transitStops: stops,
+            transitCorridors: buildTransitCorridors(stops),
+            explicitOffers: buildExplicitServiceIndex(serviceLocations),
+          });
+        },
+      )
       .catch((err: unknown) => {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Failed to load data");
@@ -177,50 +214,84 @@ export function OrgInsightsPanel({
     return series.map((point) => point.date);
   }, [forecastsByNeighborhood, selectedNeighborhood]);
 
-  useEffect(() => {
+  const defaultMonthIndex = useMemo(() => {
     if (!timeline.length) {
-      return;
+      return 0;
     }
-    // Land the slider on the last observed month (before forecast horizon).
-    const lastHistory = [...(forecastsByNeighborhood.get(selectedNeighborhood) ?? [])]
+    const lastHistory = [
+      ...(forecastsByNeighborhood.get(selectedNeighborhood) ?? []),
+    ]
       .reverse()
       .find((point) => point.kind === "history");
     const index = lastHistory
       ? timeline.indexOf(lastHistory.date)
       : timeline.length - 1;
-    setMonthIndex(Math.max(0, index));
+    return Math.max(0, index);
   }, [timeline, forecastsByNeighborhood, selectedNeighborhood]);
+
+  const monthIndex =
+    scrubbedMonth?.neighborhood === selectedNeighborhood
+      ? Math.min(scrubbedMonth.index, Math.max(0, timeline.length - 1))
+      : defaultMonthIndex;
 
   useEffect(() => {
     if (!playing || timeline.length === 0) {
       return;
     }
     const id = window.setInterval(() => {
-      setMonthIndex((current) => (current + 1) % timeline.length);
+      setScrubbedMonth((current) => {
+        const base =
+          current?.neighborhood === selectedNeighborhood
+            ? current.index
+            : defaultMonthIndex;
+        return {
+          neighborhood: selectedNeighborhood,
+          index: (base + 1) % timeline.length,
+        };
+      });
     }, 450);
     return () => window.clearInterval(id);
-  }, [playing, timeline.length]);
+  }, [playing, timeline.length, selectedNeighborhood, defaultMonthIndex]);
 
   const activeDate = timeline[monthIndex] ?? null;
 
-  const neighborhoodValueAt = useMemo(() => {
+  const neighborhoodPitAt = useMemo(() => {
     const values = new Map<string, number>();
     for (const [name, series] of forecastsByNeighborhood) {
       const point = series.find((entry) => entry.date === activeDate);
+      // History points are observed PIT-style totals; forecast points are
+      // projected population for the same metric — not service "need".
       values.set(name, point?.value ?? 0);
     }
     return values;
   }, [forecastsByNeighborhood, activeDate]);
 
-  const maxValue = useMemo(() => {
-    let max = 0;
-    for (const series of forecastsByNeighborhood.values()) {
-      for (const point of series) {
-        max = Math.max(max, point.value, point.upper);
-      }
+  const serviceFilter = mapServiceFilter;
+
+  const capacitySites = useMemo(() => {
+    if (!capacityGeo) {
+      return [] as CapacitySiteMarker[];
     }
-    return max || 1;
-  }, [forecastsByNeighborhood]);
+    return buildCapacityMarkers(capacityGeo, serviceFilter);
+  }, [capacityGeo, serviceFilter]);
+
+  const pitByBlock = useMemo(() => {
+    if (!blocks) {
+      return new Map();
+    }
+    const visible = excludeNoPanel
+      ? blocks.features.filter((feature) => feature.properties.has_panel_data)
+      : blocks.features;
+    // Re-simulate allocation when the month or resource filter changes.
+    return buildSimulatedBlockPitMap(
+      visible,
+      activeDate,
+      neighborhoodPitAt,
+      `${activeDate ?? "na"}:${serviceFilter}`,
+    );
+  }, [blocks, excludeNoPanel, activeDate, neighborhoodPitAt, serviceFilter]);
+
+  const maxPitValue = useMemo(() => maxBlockPit(pitByBlock), [pitByBlock]);
 
   const chartData = useMemo(() => {
     const series = forecastsByNeighborhood.get(selectedNeighborhood) ?? [];
@@ -233,20 +304,6 @@ export function OrgInsightsPanel({
       upper: point.kind === "forecast" ? point.upper : null,
     }));
   }, [forecastsByNeighborhood, selectedNeighborhood]);
-
-  const confidenceCounts = useMemo(() => {
-    const counts: Record<CapacityConfidence, number> = {
-      HIGH: 0,
-      MEDIUM: 0,
-      LOW: 0,
-      MODELED_FALLBACK: 0,
-    };
-    for (const row of capacity) {
-      counts[row.capacity_confidence] =
-        (counts[row.capacity_confidence] ?? 0) + 1;
-    }
-    return counts;
-  }, [capacity]);
 
   const noPanelCount =
     blocks?.features.filter((feature) => !feature.properties.has_panel_data)
@@ -279,45 +336,74 @@ export function OrgInsightsPanel({
         <Card className="overflow-hidden">
           <CardHeader className="border-b">
             <CardTitle className="font-heading text-xl">
-              Downtown need forecast
+              Downtown PIT population &amp; resources
             </CardTitle>
             <CardDescription>
-              Holt–Winters seasonal model on monthly PIT-style totals
-              (2017–2025) for six downtown neighborhoods. Choropleth uses
-              block geometry; {noPanelCount} blocks labeled Golden
-              Hill / Barrio Logan / Sherman Heights have no panel history and
-              are flagged separately.
+              Heatmap shows simulated point-in-time homeless population per
+              block — neighborhood PIT totals allocated using Get It Done block
+              count history. Provider markers are sized by capacity for the
+              selected service. Thin red lines approximate transit corridors and
+              last-mile links. {noPanelCount} blocks outside the panel grid are
+              dashed when shown.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
-            <div className="flex flex-wrap items-center gap-2">
-              {(neighborhoods.features.map((feature) => feature.properties.neighborhood)).map(
-                (name) => (
-                  <button
-                    key={name}
-                    type="button"
-                    onClick={() => setSelectedNeighborhood(name)}
-                    className={cn(
-                      "rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition-colors",
-                      selectedNeighborhood === name
-                        ? "bg-primary text-primary-foreground ring-primary"
-                        : "bg-card text-foreground ring-foreground/10 hover:bg-muted",
-                    )}
-                  >
-                    {name}
-                  </button>
-                ),
-              )}
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Resource type on map
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {SERVICE_KINDS.map((service) => (
+                    <button
+                      key={service}
+                      type="button"
+                      onClick={() => setMapServiceFilter(service)}
+                      className={cn(
+                        "rounded-lg px-3 py-1.5 text-xs font-medium ring-1 transition-colors",
+                        mapServiceFilter === service
+                          ? "bg-primary text-primary-foreground ring-primary"
+                          : "bg-card text-foreground ring-foreground/10 hover:bg-muted",
+                      )}
+                    >
+                      {serviceShortLabels[service]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {(neighborhoods.features.map((feature) => feature.properties.neighborhood)).map(
+                  (name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => setSelectedNeighborhood(name)}
+                      className={cn(
+                        "rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition-colors",
+                        selectedNeighborhood === name
+                          ? "bg-foreground text-background ring-foreground"
+                          : "bg-card text-foreground ring-foreground/10 hover:bg-muted",
+                      )}
+                    >
+                      {name}
+                    </button>
+                  ),
+                )}
+              </div>
             </div>
 
             <ForecastChoropleth
               blocks={blocks}
-              neighborhoodValueAt={neighborhoodValueAt}
+              pitByBlock={pitByBlock}
+              maxPitValue={maxPitValue}
               selectedNeighborhood={selectedNeighborhood}
               excludeNoPanel={excludeNoPanel}
-              maxValue={maxValue}
-              capacitySites={highCapacitySites}
-              showHighCapacity={showHighCapacity}
+              capacitySites={capacitySites}
+              showCapacity={showCapacity}
+              showTransit={showTransit}
+              transitCorridors={transitCorridors}
+              transitStops={transitStops}
+              serviceFilter={serviceFilter}
               onSelectNeighborhood={(name) => {
                 const key = neighborhoodForecastKey(name);
                 if (forecastsByNeighborhood.has(key)) {
@@ -356,13 +442,24 @@ export function OrgInsightsPanel({
                   <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     <input
                       type="checkbox"
-                      checked={showHighCapacity}
+                      checked={showCapacity}
                       onChange={(event) =>
-                        setShowHighCapacity(event.target.checked)
+                        setShowCapacity(event.target.checked)
                       }
                       className="size-3.5 accent-[oklch(0.4_0.075_175)]"
                     />
-                    HIGH capacity sites
+                    Capacity providers
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={showTransit}
+                      onChange={(event) =>
+                        setShowTransit(event.target.checked)
+                      }
+                      className="size-3.5 accent-[oklch(0.4_0.075_175)]"
+                    />
+                    Transit links
                   </label>
                   <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     <input
@@ -384,7 +481,10 @@ export function OrgInsightsPanel({
                 value={monthIndex}
                 onChange={(event) => {
                   setPlaying(false);
-                  setMonthIndex(Number(event.target.value));
+                  setScrubbedMonth({
+                    neighborhood: selectedNeighborhood,
+                    index: Number(event.target.value),
+                  });
                 }}
                 className="w-full accent-[oklch(0.4_0.075_175)]"
                 aria-label="Time slider"
@@ -399,33 +499,16 @@ export function OrgInsightsPanel({
                     : ""}
                 </span>
               </div>
-              <div className="flex items-center gap-2 pt-1">
-                <span className="text-[11px] text-muted-foreground">Low need</span>
-                <div
-                  className="h-2 flex-1 rounded-full"
-                  style={{
-                    background: `linear-gradient(90deg, ${needColorScale(0, 1)}, ${needColorScale(0.45, 1)}, ${needColorScale(1, 1)})`,
-                  }}
-                />
-                <span className="text-[11px] text-muted-foreground">
-                  High need (PIT-style count)
-                </span>
-              </div>
-              <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="size-2.5 rounded-full bg-[#2f6f68] ring-2 ring-[#1f4f4a]" />
-                  Teal dots = HIGH confidence capacity sites (click for details)
-                </span>
-              </div>
               <p className="text-[11px] text-muted-foreground">
-                Block color = neighborhood need for the selected month. Teal dots
-                = HIGH confidence capacity ({highCapacitySites.reduce(
-                  (sum, site) => sum + site.rows.length,
-                  0,
-                )}{" "}
-                of 14 HIGH rows mapped; 2-1-1 has no point). Some sites sit
-                outside the downtown core — the map zooms out slightly when those
-                are shown.
+                Showing {capacitySites.length}{" "}
+                {serviceShortLabels[serviceFilter].toLowerCase()} provider
+                {capacitySites.length === 1 ? "" : "s"} near downtown
+                {showTransit
+                  ? ` · ${transitCorridors.length} transit corridors`
+                  : ""}
+                . Marker size scales with that service&apos;s published/modeled
+                capacity. Heatmap = simulated PIT homeless population (green →
+                red), not service demand.
               </p>
             </div>
           </CardContent>
@@ -548,42 +631,6 @@ export function OrgInsightsPanel({
               ) : null}
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader className="border-b">
-              <CardTitle className="font-heading text-lg">
-                Capacity confidence
-              </CardTitle>
-              <CardDescription>
-                Of {capacity.length} org×category rows, only published figures
-                should drive hard allocation. HIGH rows with coordinates appear as
-                teal dots on the need map.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 pt-4">
-              {CONFIDENCE_ORDER.map((level) => (
-                <div
-                  key={level}
-                  className="flex items-center justify-between gap-3"
-                >
-                  <Badge
-                    variant="outline"
-                    className={cn("ring-1", confidenceStyles[level])}
-                  >
-                    {level === "MODELED_FALLBACK" ? "MODELED" : level}
-                  </Badge>
-                  <p className="text-sm tabular-nums text-muted-foreground">
-                    {confidenceCounts[level]} rows
-                  </p>
-                </div>
-              ))}
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                Tip: weight HIGH/MEDIUM published beds first when matching
-                participant shelter requests; treat MODELED rows as illustrative
-                only.
-              </p>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
@@ -592,6 +639,7 @@ export function OrgInsightsPanel({
           capacity={capacity}
           currentOrgName={organizationName}
           defaultService={primaryServices[0] ?? null}
+          explicitOffers={explicitOffers}
         />
       ) : null}
     </div>

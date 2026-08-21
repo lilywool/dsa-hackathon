@@ -128,3 +128,21 @@
     @apply font-sans;
   }
 }
+
+/* Leaflet DivIcon markers for capacity providers on the insights map */
+.capacity-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
+.capacity-marker-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Desaturate basemap tiles so heatmap + transit + markers stay dominant */
+.insights-map .leaflet-tile-pane {
+  filter: grayscale(1) contrast(1.05) brightness(1.02);
+}

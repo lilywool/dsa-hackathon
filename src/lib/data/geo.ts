@@ -17,15 +17,15 @@ export function distanceMeters(
 
 export function needColorScale(value: number, max: number) {
   if (max <= 0 || !Number.isFinite(value)) {
-    return "#e8e2d6";
+    return "rgba(34, 197, 94, 0.15)";
   }
   const t = Math.min(1, Math.max(0, value / max));
-  // Teal → amber → deep rust (matches Haven palette, not purple defaults)
+  // Green → yellow → orange → red (saturated, still translucent on the map)
   const stops: [number, number, number][] = [
-    [232, 226, 214],
-    [196, 168, 110],
-    [176, 98, 62],
-    [120, 58, 48],
+    [34, 197, 94], // green
+    [250, 204, 21], // yellow
+    [249, 115, 22], // orange
+    [220, 38, 38], // red
   ];
   const scaled = t * (stops.length - 1);
   const index = Math.min(stops.length - 2, Math.floor(scaled));
@@ -38,4 +38,6 @@ export function needColorScale(value: number, max: number) {
   return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
 }
 
+/** Downtown San Diego core — keep the insights map framed here. */
 export const DOWNTOWN_CENTER: [number, number] = [32.7157, -117.1611];
+export const DOWNTOWN_DEFAULT_ZOOM = 15;
