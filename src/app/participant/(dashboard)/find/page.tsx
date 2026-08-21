@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { requireParticipant } from "@/lib/auth/session";
 import {
   listDirectoryOrganizations,
-  listOpenAskKeys,
   toHelpOrganization,
 } from "@/lib/help/queries";
 import {
@@ -36,14 +35,11 @@ export default async function FindHelpPage({
 }: {
   searchParams: Promise<{ need?: string }>;
 }) {
-  const profile = await requireParticipant();
+  await requireParticipant();
   const params = await searchParams;
   const selected = isServiceKind(params.need) ? params.need : undefined;
   const persist = true;
-  const [directory, askedKeys] = await Promise.all([
-    listDirectoryOrganizations(selected),
-    listOpenAskKeys(profile.id),
-  ]);
+  const directory = await listDirectoryOrganizations(selected);
   const organizations = directory.map(toHelpOrganization);
 
   return (
@@ -136,11 +132,6 @@ export default async function FindHelpPage({
                     organizationName={org.name}
                     need={selected}
                     persist={persist}
-                    alreadyAsked={
-                      selected
-                        ? askedKeys.has(`${org.id}:${selected}`)
-                        : false
-                    }
                   />
                 </div>
               </li>

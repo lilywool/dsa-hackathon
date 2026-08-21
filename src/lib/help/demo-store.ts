@@ -70,21 +70,8 @@ export async function addDemoHelpRequest(input: {
   organizationName: string;
   need: ServiceKind;
   participantName?: string;
-}): Promise<{ ok: true; request: DemoHelpRequest } | { ok: false; duplicate: true }> {
+}): Promise<{ ok: true; request: DemoHelpRequest }> {
   const existing = await readDemoRequests();
-  const duplicate = existing.some(
-    (request) =>
-      request.organization_id === input.organizationId &&
-      request.need === input.need &&
-      request.participant_id === DEMO_PARTICIPANT_ID &&
-      (request.status === "pending" ||
-        request.status === "accepted" ||
-        request.status === "waitlisted"),
-  );
-
-  if (duplicate) {
-    return { ok: false, duplicate: true };
-  }
 
   const request: DemoHelpRequest = {
     id: `demo-${randomUUID()}`,

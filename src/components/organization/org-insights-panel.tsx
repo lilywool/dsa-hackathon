@@ -332,307 +332,303 @@ export function OrgInsightsPanel({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b">
-            <CardTitle className="font-heading text-xl">
-              Downtown PIT population &amp; resources
-            </CardTitle>
-            <CardDescription>
-              Heatmap shows simulated point-in-time homeless population per
-              block — neighborhood PIT totals allocated using Get It Done block
-              count history. Provider markers are sized by capacity for the
-              selected service. Thin red lines approximate transit corridors and
-              last-mile links. {noPanelCount} blocks outside the panel grid are
-              dashed when shown.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-4">
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Resource type on map
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {SERVICE_KINDS.map((service) => (
-                    <button
-                      key={service}
-                      type="button"
-                      onClick={() => setMapServiceFilter(service)}
-                      className={cn(
-                        "rounded-lg px-3 py-1.5 text-xs font-medium ring-1 transition-colors",
-                        mapServiceFilter === service
-                          ? "bg-primary text-primary-foreground ring-primary"
-                          : "bg-card text-foreground ring-foreground/10 hover:bg-muted",
-                      )}
-                    >
-                      {serviceShortLabels[service]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {(neighborhoods.features.map((feature) => feature.properties.neighborhood)).map(
-                  (name) => (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => setSelectedNeighborhood(name)}
-                      className={cn(
-                        "rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition-colors",
-                        selectedNeighborhood === name
-                          ? "bg-foreground text-background ring-foreground"
-                          : "bg-card text-foreground ring-foreground/10 hover:bg-muted",
-                      )}
-                    >
-                      {name}
-                    </button>
-                  ),
-                )}
-              </div>
-            </div>
-
-            <ForecastChoropleth
-              blocks={blocks}
-              pitByBlock={pitByBlock}
-              maxPitValue={maxPitValue}
-              selectedNeighborhood={selectedNeighborhood}
-              excludeNoPanel={excludeNoPanel}
-              capacitySites={capacitySites}
-              showCapacity={showCapacity}
-              showTransit={showTransit}
-              transitCorridors={transitCorridors}
-              transitStops={transitStops}
-              serviceFilter={serviceFilter}
-              onSelectNeighborhood={(name) => {
-                const key = neighborhoodForecastKey(name);
-                if (forecastsByNeighborhood.has(key)) {
-                  setSelectedNeighborhood(key);
-                }
-              }}
-            />
-
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setPlaying((value) => !value)}
-                    aria-pressed={playing}
-                  >
-                    {playing ? (
-                      <Pause className="size-3.5" aria-hidden="true" />
-                    ) : (
-                      <Play className="size-3.5" aria-hidden="true" />
-                    )}
-                    {playing ? "Pause" : "Play"}
-                  </Button>
-                  <p className="text-sm font-medium">
-                    {activeDate ? formatMonthLabel(activeDate) : "—"}
-                    {isForecastMonth ? (
-                      <span className="ml-2 text-xs font-normal text-muted-foreground">
-                        forecast
-                      </span>
-                    ) : null}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={showCapacity}
-                      onChange={(event) =>
-                        setShowCapacity(event.target.checked)
-                      }
-                      className="size-3.5 accent-[oklch(0.4_0.075_175)]"
-                    />
-                    Capacity providers
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={showTransit}
-                      onChange={(event) =>
-                        setShowTransit(event.target.checked)
-                      }
-                      className="size-3.5 accent-[oklch(0.4_0.075_175)]"
-                    />
-                    Transit links
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={excludeNoPanel}
-                      onChange={(event) =>
-                        setExcludeNoPanel(event.target.checked)
-                      }
-                      className="size-3.5 accent-[oklch(0.4_0.075_175)]"
-                    />
-                    Hide blocks without panel history
-                  </label>
-                </div>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={Math.max(0, timeline.length - 1)}
-                value={monthIndex}
-                onChange={(event) => {
-                  setPlaying(false);
-                  setScrubbedMonth({
-                    neighborhood: selectedNeighborhood,
-                    index: Number(event.target.value),
-                  });
-                }}
-                className="w-full accent-[oklch(0.4_0.075_175)]"
-                aria-label="Time slider"
-              />
-              <div className="flex justify-between text-[11px] text-muted-foreground">
-                <span>
-                  {timeline[0] ? formatMonthLabel(timeline[0]) : ""}
-                </span>
-                <span>
-                  {timeline.at(-1)
-                    ? formatMonthLabel(timeline.at(-1)!)
-                    : ""}
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Showing {capacitySites.length}{" "}
-                {serviceShortLabels[serviceFilter].toLowerCase()} provider
-                {capacitySites.length === 1 ? "" : "s"} near downtown
-                {showTransit
-                  ? ` · ${transitCorridors.length} transit corridors`
-                  : ""}
-                . Marker size scales with that service&apos;s published/modeled
-                capacity. Heatmap = simulated PIT homeless population (green →
-                red), not service demand.
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b">
+          <CardTitle className="font-heading text-xl">
+            Downtown PIT population &amp; resources
+          </CardTitle>
+          <CardDescription>
+            Heatmap shows simulated point-in-time homeless population per block
+            — neighborhood PIT totals allocated using Get It Done block count
+            history. Provider markers are sized by capacity for the selected
+            service. Thin red lines approximate transit corridors and last-mile
+            links. {noPanelCount} blocks outside the panel grid are dashed when
+            shown.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 pt-4">
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">
+                Resource type on map
               </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="border-b">
-              <CardTitle className="font-heading text-lg">
-                {selectedNeighborhood} series
-              </CardTitle>
-              <CardDescription>
-                Solid line = actual monthly PIT-style totals (2017–2025). Dashed
-                line = Holt–Winters prediction for the next 6 months, with upper
-                and lower residual bands. Not a headcount of specific people.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <div className="h-72 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart
-                    data={chartData}
-                    margin={{ top: 8, right: 12, bottom: 28, left: 8 }}
+              <div className="flex flex-wrap gap-2">
+                {SERVICE_KINDS.map((service) => (
+                  <button
+                    key={service}
+                    type="button"
+                    onClick={() => setMapServiceFilter(service)}
+                    className={cn(
+                      "rounded-lg px-3 py-1.5 text-xs font-medium ring-1 transition-colors",
+                      mapServiceFilter === service
+                        ? "bg-primary text-primary-foreground ring-primary"
+                        : "bg-card text-foreground ring-foreground/10 hover:bg-muted",
+                    )}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5dfd3" />
-                    <XAxis
-                      dataKey="label"
-                      tick={{ fontSize: 10 }}
-                      interval="preserveStartEnd"
-                      minTickGap={28}
-                    >
-                      <Label
-                        value="Month"
-                        position="insideBottom"
-                        offset={-18}
-                        style={{ fontSize: 12, fill: "oklch(0.48 0.03 55)" }}
-                      />
-                    </XAxis>
-                    <YAxis tick={{ fontSize: 10 }} width={48}>
-                      <Label
-                        value="People counted (total)"
-                        angle={-90}
-                        position="insideLeft"
-                        style={{
-                          fontSize: 12,
-                          fill: "oklch(0.48 0.03 55)",
-                          textAnchor: "middle",
-                        }}
-                      />
-                    </YAxis>
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: 12,
-                        borderColor: "#e5dfd3",
-                        fontSize: 12,
-                      }}
-                    />
-                    <Legend
-                      wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
-                      verticalAlign="top"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="upper"
-                      stroke="oklch(0.55 0.1 55 / 0.45)"
-                      strokeWidth={1}
-                      strokeDasharray="2 3"
-                      dot={false}
-                      name="Upper band (forecast)"
-                      connectNulls
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="lower"
-                      stroke="oklch(0.55 0.1 55 / 0.45)"
-                      strokeWidth={1}
-                      strokeDasharray="2 3"
-                      dot={false}
-                      name="Lower band (forecast)"
-                      connectNulls
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="observed"
-                      stroke="oklch(0.4 0.075 175)"
-                      strokeWidth={2}
-                      dot={false}
-                      name="Observed (actual)"
-                      connectNulls
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="forecast"
-                      stroke="oklch(0.55 0.1 55)"
-                      strokeWidth={2}
-                      strokeDasharray="5 4"
-                      dot={false}
-                      name="Forecast (predicted)"
-                      connectNulls
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
+                    {serviceShortLabels[service]}
+                  </button>
+                ))}
               </div>
-              {activePoint ? (
-                <p className="mt-3 text-sm text-muted-foreground">
-                  {formatMonthLabel(activePoint.date)}:{" "}
-                  <span className="font-medium text-foreground">
-                    {Math.round(activePoint.value)} people
-                  </span>
-                  {activePoint.kind === "forecast" ? (
-                    <>
-                      {" "}
-                      predicted (band {Math.round(activePoint.lower)}–
-                      {Math.round(activePoint.upper)})
-                    </>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {(neighborhoods.features.map((feature) => feature.properties.neighborhood)).map(
+                (name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setSelectedNeighborhood(name)}
+                    className={cn(
+                      "rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition-colors",
+                      selectedNeighborhood === name
+                        ? "bg-foreground text-background ring-foreground"
+                        : "bg-card text-foreground ring-foreground/10 hover:bg-muted",
+                    )}
+                  >
+                    {name}
+                  </button>
+                ),
+              )}
+            </div>
+          </div>
+
+          <ForecastChoropleth
+            blocks={blocks}
+            pitByBlock={pitByBlock}
+            maxPitValue={maxPitValue}
+            selectedNeighborhood={selectedNeighborhood}
+            excludeNoPanel={excludeNoPanel}
+            capacitySites={capacitySites}
+            showCapacity={showCapacity}
+            showTransit={showTransit}
+            transitCorridors={transitCorridors}
+            transitStops={transitStops}
+            serviceFilter={serviceFilter}
+            onSelectNeighborhood={(name) => {
+              const key = neighborhoodForecastKey(name);
+              if (forecastsByNeighborhood.has(key)) {
+                setSelectedNeighborhood(key);
+              }
+            }}
+          />
+
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPlaying((value) => !value)}
+                  aria-pressed={playing}
+                >
+                  {playing ? (
+                    <Pause className="size-3.5" aria-hidden="true" />
                   ) : (
-                    <> observed</>
+                    <Play className="size-3.5" aria-hidden="true" />
                   )}
+                  {playing ? "Pause" : "Play"}
+                </Button>
+                <p className="text-sm font-medium">
+                  {activeDate ? formatMonthLabel(activeDate) : "—"}
+                  {isForecastMonth ? (
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                      forecast
+                    </span>
+                  ) : null}
                 </p>
-              ) : null}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={showCapacity}
+                    onChange={(event) =>
+                      setShowCapacity(event.target.checked)
+                    }
+                    className="size-3.5 accent-[oklch(0.4_0.075_175)]"
+                  />
+                  Capacity providers
+                </label>
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={showTransit}
+                    onChange={(event) =>
+                      setShowTransit(event.target.checked)
+                    }
+                    className="size-3.5 accent-[oklch(0.4_0.075_175)]"
+                  />
+                  Transit links
+                </label>
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={excludeNoPanel}
+                    onChange={(event) =>
+                      setExcludeNoPanel(event.target.checked)
+                    }
+                    className="size-3.5 accent-[oklch(0.4_0.075_175)]"
+                  />
+                  Hide blocks without panel history
+                </label>
+              </div>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={Math.max(0, timeline.length - 1)}
+              value={monthIndex}
+              onChange={(event) => {
+                setPlaying(false);
+                setScrubbedMonth({
+                  neighborhood: selectedNeighborhood,
+                  index: Number(event.target.value),
+                });
+              }}
+              className="w-full accent-[oklch(0.4_0.075_175)]"
+              aria-label="Time slider"
+            />
+            <div className="flex justify-between text-[11px] text-muted-foreground">
+              <span>
+                {timeline[0] ? formatMonthLabel(timeline[0]) : ""}
+              </span>
+              <span>
+                {timeline.at(-1)
+                  ? formatMonthLabel(timeline.at(-1)!)
+                  : ""}
+              </span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Showing {capacitySites.length}{" "}
+              {serviceShortLabels[serviceFilter].toLowerCase()} provider
+              {capacitySites.length === 1 ? "" : "s"} near downtown
+              {showTransit
+                ? ` · ${transitCorridors.length} transit corridors`
+                : ""}
+              . Marker size scales with that service&apos;s published/modeled
+              capacity. Heatmap = simulated PIT homeless population (green →
+              red), not service demand.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle className="font-heading text-lg">
+            {selectedNeighborhood} series
+          </CardTitle>
+          <CardDescription>
+            Solid line = actual monthly PIT-style totals (2017–2025). Dashed
+            line = Holt–Winters prediction for the next 6 months, with upper
+            and lower residual bands. Not a headcount of specific people.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="h-72 w-full sm:h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart
+                data={chartData}
+                margin={{ top: 8, right: 12, bottom: 28, left: 8 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5dfd3" />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 10 }}
+                  interval="preserveStartEnd"
+                  minTickGap={28}
+                >
+                  <Label
+                    value="Month"
+                    position="insideBottom"
+                    offset={-18}
+                    style={{ fontSize: 12, fill: "oklch(0.48 0.03 55)" }}
+                  />
+                </XAxis>
+                <YAxis tick={{ fontSize: 10 }} width={48}>
+                  <Label
+                    value="People counted (total)"
+                    angle={-90}
+                    position="insideLeft"
+                    style={{
+                      fontSize: 12,
+                      fill: "oklch(0.48 0.03 55)",
+                      textAnchor: "middle",
+                    }}
+                  />
+                </YAxis>
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 12,
+                    borderColor: "#e5dfd3",
+                    fontSize: 12,
+                  }}
+                />
+                <Legend
+                  wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
+                  verticalAlign="top"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="upper"
+                  stroke="oklch(0.55 0.1 55 / 0.45)"
+                  strokeWidth={1}
+                  strokeDasharray="2 3"
+                  dot={false}
+                  name="Upper band (forecast)"
+                  connectNulls
+                />
+                <Line
+                  type="monotone"
+                  dataKey="lower"
+                  stroke="oklch(0.55 0.1 55 / 0.45)"
+                  strokeWidth={1}
+                  strokeDasharray="2 3"
+                  dot={false}
+                  name="Lower band (forecast)"
+                  connectNulls
+                />
+                <Line
+                  type="monotone"
+                  dataKey="observed"
+                  stroke="oklch(0.4 0.075 175)"
+                  strokeWidth={2}
+                  dot={false}
+                  name="Observed (actual)"
+                  connectNulls
+                />
+                <Line
+                  type="monotone"
+                  dataKey="forecast"
+                  stroke="oklch(0.55 0.1 55)"
+                  strokeWidth={2}
+                  strokeDasharray="5 4"
+                  dot={false}
+                  name="Forecast (predicted)"
+                  connectNulls
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+          {activePoint ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {formatMonthLabel(activePoint.date)}:{" "}
+              <span className="font-medium text-foreground">
+                {Math.round(activePoint.value)} people
+              </span>
+              {activePoint.kind === "forecast" ? (
+                <>
+                  {" "}
+                  predicted (band {Math.round(activePoint.lower)}–
+                  {Math.round(activePoint.upper)})
+                </>
+              ) : (
+                <> observed</>
+              )}
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
 
       {capacity.length > 0 ? (
         <ServiceCapacityPanel

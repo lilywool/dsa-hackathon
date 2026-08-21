@@ -8,6 +8,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 
+import { CareAssessCallout } from "@/components/participant/care-assess-callout";
 import { Button } from "@/components/ui/button";
 import { requireParticipant } from "@/lib/auth/session";
 import {
@@ -87,6 +88,8 @@ export default async function ParticipantHomePage() {
           </ul>
         )}
       </section>
+
+      <CareAssessCallout />
     </div>
   );
 }

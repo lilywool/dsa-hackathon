@@ -64,17 +64,12 @@ export async function askForHelp(
   }
 
   if (isDemoProfile(profile)) {
-    const result = await addDemoHelpRequest({
+    await addDemoHelpRequest({
       organizationId: organization.id,
       organizationName: organization.name,
       need: needValue,
       participantName: profile.display_name ?? undefined,
     });
-
-    if (!result.ok) {
-      revalidateHelpPaths();
-      return { error: null, asked: true };
-    }
 
     revalidateHelpPaths();
     return { error: null, asked: true };
@@ -87,7 +82,7 @@ export async function askForHelp(
     need: needValue,
   });
 
-  if (error && error.code !== "23505") {
+  if (error) {
     return { error: error.message, asked: false };
   }
 

@@ -229,34 +229,6 @@ export async function listParticipantConnections(participantId: string) {
   });
 }
 
-export async function listOpenAskKeys(participantId: string) {
-  if (isDemoUserId(participantId)) {
-    const demo = await readDemoRequests();
-    return new Set(
-      demo
-        .filter(
-          (request) =>
-            request.participant_id === DEMO_PARTICIPANT_ID &&
-            (request.status === "pending" ||
-              request.status === "accepted" ||
-              request.status === "waitlisted"),
-        )
-        .map((request) => `${request.organization_id}:${request.need}`),
-    );
-  }
-
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("help_requests")
-    .select("organization_id, need")
-    .eq("participant_id", participantId)
-    .in("status", ["pending", "accepted", "waitlisted"]);
-
-  return new Set(
-    (data ?? []).map((request) => `${request.organization_id}:${request.need}`),
-  );
-}
-
 export async function countPendingRequests(organizationId: string) {
   const supabase = await createClient();
   const { count } = await supabase
