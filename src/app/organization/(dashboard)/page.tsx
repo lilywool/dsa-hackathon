@@ -108,8 +108,8 @@ export default async function OrganizationOverviewPage() {
         <CardHeader className="border-b">
           <CardTitle>Downtown need forecast</CardTitle>
           <CardDescription>
-            Seasonal outlook across six neighborhoods — use it to plan beds and
-            outreach before peaks.
+            Seasonal outlook across six neighborhoods, plus per-service capacity
+            and which peers still have bed or meal vacancies for referrals.
           </CardDescription>
           <Button variant="outline" size="sm" className="mt-3 w-fit" asChild>
             <Link href="/organization/insights">

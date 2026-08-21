@@ -1,6 +1,3 @@
-import { readFile } from "fs/promises";
-import path from "path";
-
 import type { OrgCapacityRow } from "@/lib/data/types";
 import { isServiceKind, type ServiceKind } from "@/lib/services";
 
@@ -23,10 +20,10 @@ export function orgIdToCapacityKey(orgId: string | null | undefined) {
     .replace(/_/g, "-");
 }
 
-export function matchCapacityRows(
-  rows: OrgCapacityRow[],
+export function matchCapacityRows<T extends OrgCapacityRow>(
+  rows: T[],
   organization: { name: string; org_id?: string | null },
-) {
+): T[] {
   const keyFromId = orgIdToCapacityKey(organization.org_id);
   const keyFromName = slugifyOrgName(organization.name);
   const nameLower = organization.name.trim().toLowerCase();
@@ -43,12 +40,6 @@ export function matchCapacityRows(
     }
     return false;
   });
-}
-
-export async function loadOrgCapacityRows(): Promise<OrgCapacityRow[]> {
-  const filePath = path.join(process.cwd(), "public/data/org_capacity.json");
-  const raw = await readFile(filePath, "utf8");
-  return JSON.parse(raw) as OrgCapacityRow[];
 }
 
 /** capacity category_enum uses `work` / `healthcare`; app uses employment / healthcare */

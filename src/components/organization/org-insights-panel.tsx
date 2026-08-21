@@ -33,6 +33,7 @@ import {
   groupHighCapacitySites,
   type CapacitySiteMarker,
 } from "@/lib/data/capacity-geo";
+import { ServiceCapacityPanel } from "@/components/organization/service-capacity-panel";
 import { needColorScale } from "@/lib/data/geo";
 import {
   loadBlockNeedHeatmap,
@@ -47,6 +48,7 @@ import type {
   NeighborhoodTrendProps,
   OrgCapacityRow,
 } from "@/lib/data/types";
+import type { ServiceKind } from "@/lib/services";
 import { cn } from "@/lib/utils";
 
 const ForecastChoropleth = dynamic(
@@ -79,7 +81,13 @@ const confidenceStyles: Record<CapacityConfidence, string> = {
     "bg-muted text-muted-foreground ring-foreground/10",
 };
 
-export function OrgInsightsPanel() {
+export function OrgInsightsPanel({
+  organizationName,
+  primaryServices = [],
+}: {
+  organizationName?: string | null;
+  primaryServices?: ServiceKind[];
+} = {}) {
   const [neighborhoods, setNeighborhoods] =
     useState<FeatureCollection<NeighborhoodTrendProps> | null>(null);
   const [blocks, setBlocks] =
@@ -578,6 +586,14 @@ export function OrgInsightsPanel() {
           </Card>
         </div>
       </div>
+
+      {capacity.length > 0 ? (
+        <ServiceCapacityPanel
+          capacity={capacity}
+          currentOrgName={organizationName}
+          defaultService={primaryServices[0] ?? null}
+        />
+      ) : null}
     </div>
   );
 }
