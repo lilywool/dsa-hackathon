@@ -3,21 +3,28 @@ import Link from "next/link";
 import { AskForHelpButton } from "@/components/participant/ask-for-help-button";
 import { NeedBadge } from "@/components/status-badges";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { isDemoProfile } from "@/lib/auth/demo";
+import { requireParticipant } from "@/lib/auth/session";
 import {
-  helpOrganizations,
-  isNeedType,
-  needShortLabels,
-  type NeedType,
-} from "@/lib/placeholder";
+  listDirectoryOrganizations,
+  listOpenAskKeys,
+  toHelpOrganization,
+} from "@/lib/help/queries";
+import {
+  isServiceKind,
+  serviceShortLabels,
+  type ServiceKind,
+} from "@/lib/services";
+import { cn } from "@/lib/utils";
 
-const filters: { id: NeedType | "all"; label: string }[] = [
+const filters: { id: ServiceKind | "all"; label: string }[] = [
   { id: "all", label: "All help" },
-  { id: "shelter", label: needShortLabels.shelter },
-  { id: "food", label: needShortLabels.food },
-  { id: "healthcare", label: needShortLabels.healthcare },
-  { id: "work", label: needShortLabels.work },
-  { id: "clothing", label: needShortLabels.clothing },
+  { id: "shelter", label: serviceShortLabels.shelter },
+  { id: "food", label: serviceShortLabels.food },
+  { id: "healthcare", label: serviceShortLabels.healthcare },
+  { id: "employment", label: serviceShortLabels.employment },
+  { id: "clothing", label: serviceShortLabels.clothing },
+  { id: "other", label: serviceShortLabels.other },
 ];
 
 export const metadata = {
@@ -29,19 +36,23 @@ export default async function FindHelpPage({
 }: {
   searchParams: Promise<{ need?: string }>;
 }) {
+  const profile = await requireParticipant();
   const params = await searchParams;
-  const selected = isNeedType(params.need) ? params.need : undefined;
-  const organizations = selected
-    ? helpOrganizations.filter((org) => org.services.includes(selected))
-    : helpOrganizations;
+  const selected = isServiceKind(params.need) ? params.need : undefined;
+  const persist = !isDemoProfile(profile);
+  const [directory, askedKeys] = await Promise.all([
+    listDirectoryOrganizations(selected),
+    persist ? listOpenAskKeys(profile.id) : Promise.resolve(new Set<string>()),
+  ]);
+  const organizations = directory.map(toHelpOrganization);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-3xl tracking-tight">Find help</h1>
         <p className="mt-2 text-muted-foreground">
-          Organizations nearby that can help with shelter, meals, care, and
-          more.
+          San Diego organizations from our resource directory, matched to what
+          you need.
         </p>
       </div>
       <div className="-mx-4 overflow-x-auto px-4">
@@ -72,7 +83,7 @@ export default async function FindHelpPage({
       </div>
       {organizations.length === 0 ? (
         <p className="rounded-2xl bg-card p-6 text-muted-foreground ring-1 ring-foreground/10">
-          No programs shown for that yet. Try another kind of help.
+          No organizations nearby offer that yet. Try another kind of help.
         </p>
       ) : (
         <ul className="space-y-4">
@@ -88,16 +99,36 @@ export default async function FindHelpPage({
                     <Badge variant="secondary">{org.openLabel}</Badge>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {org.neighborhood} · {org.walkTime}
+                    {org.neighborhood}
                   </p>
-                  <p className="mt-3 text-sm">{org.highlight}</p>
+                  <p className="mt-3 text-sm leading-relaxed">{org.highlight}</p>
+                  {org.website ? (
+                    <a
+                      href={org.website}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-2 inline-block text-sm text-primary underline-offset-4 hover:underline"
+                    >
+                      Visit website
+                    </a>
+                  ) : null}
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {org.services.map((service) => (
                       <NeedBadge key={service} need={service} />
                     ))}
                   </div>
                 </div>
-                <AskForHelpButton organization={org.name} />
+                <AskForHelpButton
+                  organizationId={org.id}
+                  organizationName={org.name}
+                  need={selected}
+                  persist={persist}
+                  alreadyAsked={
+                    selected
+                      ? askedKeys.has(`${org.id}:${selected}`)
+                      : false
+                  }
+                />
               </div>
             </li>
           ))}

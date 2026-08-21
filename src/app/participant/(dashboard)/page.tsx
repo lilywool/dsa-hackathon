@@ -9,23 +9,25 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { requireParticipant } from "@/lib/auth/session";
 import {
-  helpOrganizations,
-  needOptions,
-  type NeedType,
-} from "@/lib/placeholder";
+  listDirectoryOrganizations,
+  toHelpOrganization,
+} from "@/lib/help/queries";
+import { needOptions, type ServiceKind } from "@/lib/services";
 
-const needIcons: Record<NeedType, typeof BedDouble> = {
+const needIcons: Record<ServiceKind, typeof BedDouble> = {
   shelter: BedDouble,
   food: UtensilsCrossed,
   healthcare: HeartPulse,
-  work: Briefcase,
+  employment: Briefcase,
   clothing: Shirt,
   other: Sparkles,
 };
 
-export default function ParticipantHomePage() {
-  const nearby = helpOrganizations.slice(0, 3);
+export default async function ParticipantHomePage() {
+  await requireParticipant();
+  const nearby = (await listDirectoryOrganizations()).map(toHelpOrganization);
 
   return (
     <div className="space-y-10">
@@ -34,7 +36,7 @@ export default function ParticipantHomePage() {
           What do you need today?
         </h1>
         <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-          Tap one. We will show nearby organizations that can help.
+          Tap one. We will show organizations that offer that service.
         </p>
       </div>
       <section>
@@ -64,20 +66,26 @@ export default function ParticipantHomePage() {
             <Link href="/participant/find">See all</Link>
           </Button>
         </div>
-        <ul className="space-y-3">
-          {nearby.map((org) => (
-            <li
-              key={org.id}
-              className="rounded-2xl bg-card p-4 ring-1 ring-foreground/10"
-            >
-              <p className="font-medium">{org.name}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {org.neighborhood} · {org.walkTime}
-              </p>
-              <p className="mt-2 text-sm">{org.highlight}</p>
-            </li>
-          ))}
-        </ul>
+        {nearby.length === 0 ? (
+          <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground ring-1 ring-foreground/10">
+            No organizations are listed yet.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {nearby.slice(0, 3).map((org) => (
+              <li
+                key={org.id}
+                className="rounded-2xl bg-card p-4 ring-1 ring-foreground/10"
+              >
+                <p className="font-medium">{org.name}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {org.neighborhood}
+                </p>
+                <p className="mt-2 text-sm">{org.highlight}</p>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

@@ -1,16 +1,22 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-} from "@/components/ui/card";
-import { connectedPeople } from "@/lib/placeholder";
+import { requireOrganization } from "@/lib/auth/session";
+import { getOwnedOrganization, listIncomingRequests } from "@/lib/help/queries";
+import { NeedBadge, StatusBadge } from "@/components/status-badges";
 
 export const metadata = {
   title: "People connected",
 };
 
-export default function OrganizationPeoplePage() {
+export default async function OrganizationPeoplePage() {
+  const profile = await requireOrganization();
+  const organization = await getOwnedOrganization(profile);
+  const services = organization?.services ?? [];
+  const connections =
+    organization?.id && services.length > 0
+      ? (await listIncomingRequests(organization.id, services)).filter(
+          (request) => request.status === "accepted",
+        )
+      : [];
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
@@ -18,29 +24,32 @@ export default function OrganizationPeoplePage() {
           People connected
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Participants currently linked to a Harbor House program. Names here
-          are sample copy for the interface.
+          Participants you have accepted from incoming requests.
         </p>
       </div>
-      <div className="space-y-3">
-        {connectedPeople.map((person) => (
-          <Card key={person.id}>
-            <CardContent className="flex items-start gap-3">
-              <Avatar size="lg">
-                <AvatarFallback>{person.initials}</AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="font-medium">{person.name}</p>
-                <CardDescription>{person.program}</CardDescription>
-                <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
-                  <p>With you: {person.since}</p>
-                  <p>Next: {person.nextStep}</p>
-                </div>
+      {connections.length === 0 ? (
+        <p className="rounded-xl bg-card p-6 text-sm text-muted-foreground ring-1 ring-foreground/10">
+          No one is connected yet. Accept a request from incoming requests.
+        </p>
+      ) : (
+        <ul className="space-y-3">
+          {connections.map((connection) => (
+            <li
+              key={connection.id}
+              className="rounded-2xl bg-card p-5 ring-1 ring-foreground/10"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-medium">{connection.name}</h2>
+                <NeedBadge need={connection.need} />
+                <StatusBadge status={connection.status} />
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                {connection.note}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

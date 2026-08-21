@@ -9,34 +9,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { NeedBadge, UrgencyBadge } from "@/components/status-badges";
-import { demoOrganization, isDemoProfile } from "@/lib/auth/demo";
+import { NeedBadge } from "@/components/status-badges";
 import { requireOrganization } from "@/lib/auth/session";
-import { incomingRequests, orgStats, programs } from "@/lib/placeholder";
-import { createClient } from "@/lib/supabase/server";
+import {
+  countPendingRequests,
+  getOwnedOrganization,
+  listIncomingRequests,
+} from "@/lib/help/queries";
+import { serviceShortLabels } from "@/lib/services";
 
 export default async function OrganizationOverviewPage() {
   const profile = await requireOrganization();
-  let organization: { name: string; location: string } | null = null;
-
-  if (isDemoProfile(profile)) {
-    organization = demoOrganization();
-  } else {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("organizations")
-      .select("name, location")
-      .eq("owner_id", profile.id)
-      .maybeSingle();
-    organization = data;
-  }
-
-  const waiting = incomingRequests.filter(
-    (request) => request.status === "pending",
-  );
-  const tightPrograms = programs.filter(
-    (program) => program.open / program.capacity <= 0.25,
-  );
+  const organization = await getOwnedOrganization(profile);
+  const services = organization?.services ?? [];
+  const requests = organization?.id
+    ? await listIncomingRequests(organization.id, services)
+    : [];
+  const waiting = requests.filter((request) => request.status === "pending");
+  const pendingCount = organization?.id
+    ? await countPendingRequests(organization.id)
+    : 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
@@ -47,43 +39,91 @@ export default async function OrganizationOverviewPage() {
         <h1 className="font-heading mt-1 text-3xl tracking-tight">
           {organization?.name ?? profile.display_name}
         </h1>
+        {organization?.notes ? (
+          <p className="mt-2 max-w-2xl text-muted-foreground">
+            {organization.notes}
+          </p>
+        ) : null}
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          A snapshot of who is waiting, what you can offer tonight, and who is
-          already connected to your programs.
+          Services listed
+          {services.length > 0
+            ? `: ${services.map((service) => serviceShortLabels[service]).join(", ")}`
+            : ""}
+          .
         </p>
       </div>
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {orgStats.map((stat) => (
-          <Card key={stat.label} size="sm">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <Card size="sm">
+          <CardHeader>
+            <CardDescription>Waiting to connect</CardDescription>
+            <CardTitle className="font-heading text-3xl">
+              {pendingCount}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">
+              Matched requests from participants
+            </p>
+          </CardContent>
+        </Card>
+        <Card size="sm">
+          <CardHeader>
+            <CardDescription>Services offered</CardDescription>
+            <CardTitle className="font-heading text-3xl">
+              {services.length}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-1.5">
+              {services.map((service) => (
+                <NeedBadge key={service} need={service} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        {organization?.phone ? (
+          <Card size="sm">
             <CardHeader>
-              <CardDescription>{stat.label}</CardDescription>
-              <CardTitle className="font-heading text-3xl">
-                {stat.value}
+              <CardDescription>Contact</CardDescription>
+              <CardTitle className="font-heading text-2xl">
+                {organization.phone}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xs text-muted-foreground">{stat.hint}</p>
+              {organization.website ? (
+                <a
+                  href={organization.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-primary underline-offset-4 hover:underline"
+                >
+                  Visit website
+                </a>
+              ) : null}
             </CardContent>
           </Card>
-        ))}
+        ) : null}
       </section>
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <Card>
-          <CardHeader className="border-b">
-            <CardTitle>People waiting to connect</CardTitle>
-            <CardDescription>
-              These requests are placeholders so you can see how staff will
-              respond later.
-            </CardDescription>
-            <Button variant="outline" size="sm" className="mt-3 w-fit" asChild>
-              <Link href="/organization/requests">
-                View all requests
-                <ArrowRight data-icon="inline-end" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent className="divide-y px-0">
-            {waiting.slice(0, 3).map((request) => (
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>People waiting to connect</CardTitle>
+          <CardDescription>
+            Participant requests that match your listed services.
+          </CardDescription>
+          <Button variant="outline" size="sm" className="mt-3 w-fit" asChild>
+            <Link href="/organization/requests">
+              View all requests
+              <ArrowRight data-icon="inline-end" />
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent className="divide-y px-0">
+          {waiting.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-muted-foreground">
+              No matched requests right now.
+            </p>
+          ) : (
+            waiting.slice(0, 3).map((request) => (
               <div
                 key={request.id}
                 className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
@@ -94,46 +134,12 @@ export default async function OrganizationOverviewPage() {
                     {request.note}
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <NeedBadge need={request.need} />
-                  <UrgencyBadge urgency={request.urgency} />
-                </div>
+                <NeedBadge need={request.need} />
               </div>
-            ))}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="border-b">
-            <CardTitle>Capacity to watch</CardTitle>
-            <CardDescription>
-              Programs with the fewest remaining spots.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {tightPrograms.map((program) => (
-              <div key={program.id} className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium">{program.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {program.open} open
-                  </p>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary"
-                    style={{
-                      width: `${Math.round((program.open / program.capacity) * 100)}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/organization/programs">Review all programs</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

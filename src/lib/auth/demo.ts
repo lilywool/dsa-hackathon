@@ -1,7 +1,8 @@
 import type { Profile } from "@/lib/supabase/database.types";
-import { currentOrganization, currentParticipant } from "@/lib/placeholder";
+import { currentParticipant } from "@/lib/placeholder";
 
 export const DEMO_COOKIE = "haven-demo-role";
+export const DEMO_ORG_CODE = "SD-FATHERS-JOES-VILLAGES";
 
 export type DemoRole = "participant" | "organization";
 
@@ -55,20 +56,21 @@ export function demoProfile(role: DemoRole): Profile {
 
   return {
     id: DEMO_ORGANIZATION_ID,
-    display_name: currentOrganization.name,
-    org_id: "DEV-ORG",
+    display_name: "Father Joe's Villages",
+    org_id: DEMO_ORG_CODE,
     role: "organization",
     created_at: "2026-01-01T00:00:00.000Z",
   };
 }
 
 export function isDemoProfile(profile: Profile) {
-  return profile.id === DEMO_PARTICIPANT_ID || profile.id === DEMO_ORGANIZATION_ID;
+  return isDemoUserId(profile.id);
 }
 
-export function demoOrganization() {
-  return {
-    name: currentOrganization.name,
-    location: currentOrganization.neighborhood,
-  };
+export function isDemoUserId(id: string) {
+  return id === DEMO_PARTICIPANT_ID || id === DEMO_ORGANIZATION_ID;
+}
+
+export function isDemoOrganizationId(id: string) {
+  return id === DEMO_ORGANIZATION_ID;
 }
