@@ -10,31 +10,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { NeedBadge, UrgencyBadge } from "@/components/status-badges";
-import { demoOrganization, isDemoProfile } from "@/lib/auth/demo";
 import { requireOrganization } from "@/lib/auth/session";
-import { incomingRequests, orgStats, programs } from "@/lib/placeholder";
-import { createClient } from "@/lib/supabase/server";
+import { getOwnedOrganization, listIncomingRequests } from "@/lib/help/queries";
+import { serviceShortLabels } from "@/lib/services";
+import { orgStats, programs } from "@/lib/placeholder";
 
 export default async function OrganizationOverviewPage() {
   const profile = await requireOrganization();
-  let organization: { name: string; location: string } | null = null;
-
-  if (isDemoProfile(profile)) {
-    organization = demoOrganization();
-  } else {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("organizations")
-      .select("name, location")
-      .eq("owner_id", profile.id)
-      .maybeSingle();
-    organization = data;
-  }
-
-  const waiting = incomingRequests.filter(
-    (request) => request.status === "pending",
+  const organization = await getOwnedOrganization(profile);
+  const services = organization?.services ?? [];
+  const requests = organization?.id
+    ? await listIncomingRequests(organization.id, services)
+    : [];
+  const waiting = requests.filter((request) => request.status === "pending");
+  const offeredPrograms = programs.filter((program) =>
+    services.includes(program.category),
   );
-  const tightPrograms = programs.filter(
+  const tightPrograms = offeredPrograms.filter(
     (program) => program.open / program.capacity <= 0.25,
   );
 
@@ -48,8 +40,11 @@ export default async function OrganizationOverviewPage() {
           {organization?.name ?? profile.display_name}
         </h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          A snapshot of who is waiting, what you can offer tonight, and who is
-          already connected to your programs.
+          Requests here are only for the services you provide
+          {services.length > 0
+            ? `: ${services.map((service) => serviceShortLabels[service]).join(", ")}`
+            : ""}
+          .
         </p>
       </div>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -72,8 +67,7 @@ export default async function OrganizationOverviewPage() {
           <CardHeader className="border-b">
             <CardTitle>People waiting to connect</CardTitle>
             <CardDescription>
-              These requests are placeholders so you can see how staff will
-              respond later.
+              Matched to the help you offer. Connect from incoming requests.
             </CardDescription>
             <Button variant="outline" size="sm" className="mt-3 w-fit" asChild>
               <Link href="/organization/requests">
@@ -83,23 +77,31 @@ export default async function OrganizationOverviewPage() {
             </Button>
           </CardHeader>
           <CardContent className="divide-y px-0">
-            {waiting.slice(0, 3).map((request) => (
-              <div
-                key={request.id}
-                className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div>
-                  <p className="font-medium">{request.name}</p>
-                  <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
-                    {request.note}
-                  </p>
+            {waiting.length === 0 ? (
+              <p className="px-4 py-6 text-sm text-muted-foreground">
+                No matched requests right now.
+              </p>
+            ) : (
+              waiting.slice(0, 3).map((request) => (
+                <div
+                  key={request.id}
+                  className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-medium">{request.name}</p>
+                    <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
+                      {request.note}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <NeedBadge need={request.need} />
+                    {request.urgency ? (
+                      <UrgencyBadge urgency={request.urgency} />
+                    ) : null}
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <NeedBadge need={request.need} />
-                  <UrgencyBadge urgency={request.urgency} />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -110,24 +112,30 @@ export default async function OrganizationOverviewPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {tightPrograms.map((program) => (
-              <div key={program.id} className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium">{program.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {program.open} open
-                  </p>
+            {tightPrograms.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No listed programs for your services yet.
+              </p>
+            ) : (
+              tightPrograms.map((program) => (
+                <div key={program.id} className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-medium">{program.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {program.open} open
+                    </p>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{
+                        width: `${Math.round((program.open / program.capacity) * 100)}%`,
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary"
-                    style={{
-                      width: `${Math.round((program.open / program.capacity) * 100)}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
             <Button variant="outline" className="w-full" asChild>
               <Link href="/organization/programs">Review all programs</Link>
             </Button>

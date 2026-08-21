@@ -18,6 +18,7 @@ const demoAccounts = {
 
 const DEMO_PARTICIPANT_ID = "00000000-0000-4000-a000-000000000001";
 const DEMO_ORGANIZATION_ID = "00000000-0000-4000-a000-000000000002";
+export const DEMO_ORG_CODE = "DEV-ORG";
 
 export function matchDemoAccount(
   email: string,
@@ -63,12 +64,21 @@ export function demoProfile(role: DemoRole): Profile {
 }
 
 export function isDemoProfile(profile: Profile) {
-  return profile.id === DEMO_PARTICIPANT_ID || profile.id === DEMO_ORGANIZATION_ID;
+  return isDemoUserId(profile.id);
+}
+
+export function isDemoUserId(id: string) {
+  return id === DEMO_PARTICIPANT_ID || id === DEMO_ORGANIZATION_ID;
+}
+
+export function isDemoOrganizationId(id: string) {
+  return id === DEMO_ORGANIZATION_ID;
 }
 
 export function demoOrganization() {
   return {
     name: currentOrganization.name,
     location: currentOrganization.neighborhood,
+    services: currentOrganization.services,
   };
 }

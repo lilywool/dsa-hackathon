@@ -1,10 +1,22 @@
 import { RequestsPanel } from "@/components/organization/requests-panel";
+import { isDemoProfile } from "@/lib/auth/demo";
+import { requireOrganization } from "@/lib/auth/session";
+import { getOwnedOrganization, listIncomingRequests } from "@/lib/help/queries";
+import { serviceShortLabels } from "@/lib/services";
 
 export const metadata = {
   title: "Incoming requests",
 };
 
-export default function OrganizationRequestsPage() {
+export default async function OrganizationRequestsPage() {
+  const profile = await requireOrganization();
+  const organization = await getOwnedOrganization(profile);
+  const services = organization?.services ?? [];
+  const persist = !isDemoProfile(profile) && Boolean(organization?.id);
+  const requests = organization?.id
+    ? await listIncomingRequests(organization.id, services)
+    : [];
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
@@ -12,11 +24,14 @@ export default function OrganizationRequestsPage() {
           Incoming requests
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Participants asking to connect with Harbor House. Connect or waitlist
-          to preview how staff will handle the queue.
+          People asking for help that matches what you provide
+          {services.length > 0
+            ? ` — ${services.map((service) => serviceShortLabels[service]).join(", ")}`
+            : ""}
+          .
         </p>
       </div>
-      <RequestsPanel />
+      <RequestsPanel requests={requests} persist={persist} />
     </div>
   );
 }

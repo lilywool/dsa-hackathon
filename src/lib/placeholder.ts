@@ -1,34 +1,21 @@
+import type { RequestStatus, ServiceKind } from "@/lib/supabase/database.types";
+import {
+  isServiceKind,
+  needOptions,
+  serviceLabels,
+  serviceShortLabels,
+} from "@/lib/services";
+
 export const appName = "Haven";
 export const appTagline = "Connecting people with organizations that help.";
 
-export type NeedType =
-  | "shelter"
-  | "food"
-  | "healthcare"
-  | "work"
-  | "clothing"
-  | "other";
+export type NeedType = ServiceKind;
+export type { RequestStatus };
 
-export type RequestStatus = "pending" | "accepted" | "waitlisted" | "declined";
 export type Urgency = "today" | "this-week" | "flexible";
 
-export const needLabels: Record<NeedType, string> = {
-  shelter: "A place to sleep",
-  food: "A meal",
-  healthcare: "Health care",
-  work: "Work or training",
-  clothing: "Clothes",
-  other: "Something else",
-};
-
-export const needShortLabels: Record<NeedType, string> = {
-  shelter: "Shelter",
-  food: "Food",
-  healthcare: "Health",
-  work: "Work",
-  clothing: "Clothes",
-  other: "Other",
-};
+export const needLabels = serviceLabels;
+export const needShortLabels = serviceShortLabels;
 
 export const urgencyLabels: Record<Urgency, string> = {
   today: "Needed today",
@@ -40,6 +27,7 @@ export const currentOrganization = {
   name: "Harbor House",
   role: "Shelter & meals",
   neighborhood: "Midtown",
+  services: ["shelter", "food", "clothing"] as NeedType[],
 };
 
 export const currentParticipant = {
@@ -58,7 +46,7 @@ export type IncomingRequest = {
   name: string;
   initials: string;
   need: NeedType;
-  urgency: Urgency;
+  urgency?: Urgency;
   note: string;
   waited: string;
   status: RequestStatus;
@@ -284,22 +272,4 @@ export const participantConnections: ParticipantConnection[] = [
   },
 ];
 
-export const needOptions: { id: NeedType; prompt: string }[] = [
-  { id: "shelter", prompt: "I need a place to sleep" },
-  { id: "food", prompt: "I need a meal" },
-  { id: "healthcare", prompt: "I need health care" },
-  { id: "work", prompt: "I need work or training" },
-  { id: "clothing", prompt: "I need clothes" },
-  { id: "other", prompt: "I need something else" },
-];
-
-export function isNeedType(value: string | undefined): value is NeedType {
-  return (
-    value === "shelter" ||
-    value === "food" ||
-    value === "healthcare" ||
-    value === "work" ||
-    value === "clothing" ||
-    value === "other"
-  );
-}
+export { needOptions, isServiceKind as isNeedType };

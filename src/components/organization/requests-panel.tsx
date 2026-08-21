@@ -7,14 +7,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { NeedBadge, StatusBadge, UrgencyBadge } from "@/components/status-badges";
-import {
-  incomingRequests,
-  type IncomingRequest,
-  type RequestStatus,
-} from "@/lib/placeholder";
+import { updateHelpRequestStatus } from "@/lib/help/actions";
+import type { IncomingRequest, RequestStatus } from "@/lib/placeholder";
 
-export function RequestsPanel() {
-  const [requests, setRequests] = useState(incomingRequests);
+export function RequestsPanel({
+  requests: initialRequests,
+  persist = false,
+}: {
+  requests: IncomingRequest[];
+  persist?: boolean;
+}) {
+  const [requests, setRequests] = useState(initialRequests);
 
   function setStatus(id: string, status: RequestStatus) {
     setRequests((current) =>
@@ -24,8 +27,9 @@ export function RequestsPanel() {
     );
   }
 
-  const pending = requests.filter((request) => request.status === "pending");
-  const others = requests.filter((request) => request.status !== "pending");
+  const visible = persist ? initialRequests : requests;
+  const pending = visible.filter((request) => request.status === "pending");
+  const others = visible.filter((request) => request.status !== "pending");
 
   return (
     <div className="space-y-8">
@@ -40,6 +44,7 @@ export function RequestsPanel() {
             <RequestCard
               key={request.id}
               request={request}
+              persist={persist}
               onStatus={setStatus}
             />
           ))
@@ -52,6 +57,7 @@ export function RequestsPanel() {
             <RequestCard
               key={request.id}
               request={request}
+              persist={persist}
               onStatus={setStatus}
             />
           ))}
@@ -63,9 +69,11 @@ export function RequestsPanel() {
 
 function RequestCard({
   request,
+  persist,
   onStatus,
 }: {
   request: IncomingRequest;
+  persist: boolean;
   onStatus: (id: string, status: RequestStatus) => void;
 }) {
   const isPending = request.status === "pending";
@@ -80,7 +88,7 @@ function RequestCard({
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-medium">{request.name}</p>
             <NeedBadge need={request.need} />
-            <UrgencyBadge urgency={request.urgency} />
+            {request.urgency ? <UrgencyBadge urgency={request.urgency} /> : null}
             {request.status !== "pending" ? (
               <StatusBadge status={request.status} />
             ) : null}
@@ -95,20 +103,42 @@ function RequestCard({
         </div>
         {isPending ? (
           <div className="flex shrink-0 gap-2 sm:flex-col">
-            <Button
-              className="flex-1 sm:flex-none"
-              onClick={() => onStatus(request.id, "accepted")}
-            >
-              <Check data-icon="inline-start" />
-              Connect
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 sm:flex-none"
-              onClick={() => onStatus(request.id, "waitlisted")}
-            >
-              Waitlist
-            </Button>
+            {persist ? (
+              <>
+                <form action={updateHelpRequestStatus}>
+                  <input type="hidden" name="requestId" value={request.id} />
+                  <input type="hidden" name="status" value="accepted" />
+                  <Button type="submit" className="w-full">
+                    <Check data-icon="inline-start" />
+                    Connect
+                  </Button>
+                </form>
+                <form action={updateHelpRequestStatus}>
+                  <input type="hidden" name="requestId" value={request.id} />
+                  <input type="hidden" name="status" value="waitlisted" />
+                  <Button type="submit" variant="outline" className="w-full">
+                    Waitlist
+                  </Button>
+                </form>
+              </>
+            ) : (
+              <>
+                <Button
+                  className="flex-1 sm:flex-none"
+                  onClick={() => onStatus(request.id, "accepted")}
+                >
+                  <Check data-icon="inline-start" />
+                  Connect
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 sm:flex-none"
+                  onClick={() => onStatus(request.id, "waitlisted")}
+                >
+                  Waitlist
+                </Button>
+              </>
+            )}
           </div>
         ) : null}
       </CardContent>

@@ -9,6 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      help_requests: {
+        Row: {
+          created_at: string;
+          id: string;
+          need: Database["public"]["Enums"]["service_kind"];
+          note: string | null;
+          organization_id: string;
+          participant_id: string;
+          participant_name: string;
+          status: Database["public"]["Enums"]["request_status"];
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          need: Database["public"]["Enums"]["service_kind"];
+          note?: string | null;
+          organization_id: string;
+          participant_id: string;
+          participant_name: string;
+          status?: Database["public"]["Enums"]["request_status"];
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          need?: Database["public"]["Enums"]["service_kind"];
+          note?: string | null;
+          organization_id?: string;
+          participant_id?: string;
+          participant_name?: string;
+          status?: Database["public"]["Enums"]["request_status"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "help_requests_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "help_requests_participant_id_fkey";
+            columns: ["participant_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       organization_applications: {
         Row: {
           created_at: string;
@@ -52,7 +100,7 @@ export type Database = {
           location: string;
           name: string;
           org_id: string;
-          owner_id: string;
+          owner_id: string | null;
           services: Database["public"]["Enums"]["service_kind"][];
         };
         Insert: {
@@ -61,7 +109,7 @@ export type Database = {
           location: string;
           name: string;
           org_id: string;
-          owner_id: string;
+          owner_id?: string | null;
           services: Database["public"]["Enums"]["service_kind"][];
         };
         Update: {
@@ -70,7 +118,7 @@ export type Database = {
           location?: string;
           name?: string;
           org_id?: string;
-          owner_id?: string;
+          owner_id?: string | null;
           services?: Database["public"]["Enums"]["service_kind"][];
         };
         Relationships: [];
@@ -137,6 +185,7 @@ export type Database = {
     Enums: {
       account_role: "participant" | "pending_organization" | "organization";
       application_status: "pending" | "approved" | "denied";
+      request_status: "pending" | "accepted" | "waitlisted" | "declined";
       service_kind:
         | "shelter"
         | "food"
@@ -154,4 +203,7 @@ export type Database = {
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type OrganizationApplication =
   Database["public"]["Tables"]["organization_applications"]["Row"];
+export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
+export type HelpRequest = Database["public"]["Tables"]["help_requests"]["Row"];
 export type ServiceKind = Database["public"]["Enums"]["service_kind"];
+export type RequestStatus = Database["public"]["Enums"]["request_status"];
