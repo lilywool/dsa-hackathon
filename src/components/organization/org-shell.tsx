@@ -7,6 +7,7 @@ import {
   BedDouble,
   ClipboardList,
   LayoutDashboard,
+  LineChart,
   Menu,
   Users,
 } from "lucide-react";
@@ -27,6 +28,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/organization", label: "Overview", icon: LayoutDashboard },
   { href: "/organization/requests", label: "Incoming requests", icon: ClipboardList },
+  { href: "/organization/insights", label: "Need & capacity", icon: LineChart },
   { href: "/organization/programs", label: "Programs & capacity", icon: BedDouble },
   { href: "/organization/people", label: "People connected", icon: Users },
 ];

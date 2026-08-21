@@ -1,6 +1,12 @@
 import { cache } from "react";
 
-import { DEMO_ORG_CODE, isDemoOrganizationId } from "@/lib/auth/demo";
+import {
+  DEMO_ORG_CODE,
+  DEMO_PARTICIPANT_ID,
+  isDemoOrganizationId,
+  isDemoUserId,
+} from "@/lib/auth/demo";
+import { readDemoRequests } from "@/lib/help/demo-store";
 import {
   formatWaited,
   initialsFromName,
@@ -132,7 +138,7 @@ export async function listIncomingRequests(
     .in("need", services)
     .order("created_at", { ascending: false });
 
-  return (data ?? []).map((request) => ({
+  const fromDb = (data ?? []).map((request) => ({
     id: request.id,
     name: request.participant_name,
     initials: initialsFromName(request.participant_name),
@@ -142,10 +148,56 @@ export async function listIncomingRequests(
       `Asked for ${serviceLabels[request.need].toLowerCase()}.`,
     waited: formatWaited(request.created_at),
     status: request.status,
+    created_at: request.created_at,
   }));
+
+  const demo = (await readDemoRequests())
+    .filter(
+      (request) =>
+        request.organization_id === organizationId &&
+        services.includes(request.need),
+    )
+    .map((request) => ({
+      id: request.id,
+      name: request.participant_name,
+      initials: initialsFromName(request.participant_name),
+      need: request.need,
+      note:
+        request.note?.trim() ||
+        `Asked for ${serviceLabels[request.need].toLowerCase()}.`,
+      waited: formatWaited(request.created_at),
+      status: request.status,
+      created_at: request.created_at,
+    }));
+
+  return [...demo, ...fromDb]
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map(({ created_at: _createdAt, ...request }) => request);
 }
 
 export async function listParticipantConnections(participantId: string) {
+  if (isDemoUserId(participantId) || participantId === DEMO_PARTICIPANT_ID) {
+    const demo = await readDemoRequests();
+    return demo
+      .filter((request) => request.participant_id === DEMO_PARTICIPANT_ID)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .map((request) => ({
+        id: request.id,
+        organizationId: request.organization_id,
+        organization: request.organization_name,
+        need: request.need,
+        status: request.status,
+        detail:
+          request.status === "accepted"
+            ? "They are ready to help. Check in when you can."
+            : request.status === "waitlisted"
+              ? "You are on their waitlist."
+              : request.status === "declined"
+                ? "They could not take this request."
+                : "They usually reply within a day.",
+      }));
+  }
+
   const supabase = await createClient();
   const { data } = await supabase
     .from("help_requests")
@@ -177,6 +229,21 @@ export async function listParticipantConnections(participantId: string) {
 }
 
 export async function listOpenAskKeys(participantId: string) {
+  if (isDemoUserId(participantId)) {
+    const demo = await readDemoRequests();
+    return new Set(
+      demo
+        .filter(
+          (request) =>
+            request.participant_id === DEMO_PARTICIPANT_ID &&
+            (request.status === "pending" ||
+              request.status === "accepted" ||
+              request.status === "waitlisted"),
+        )
+        .map((request) => `${request.organization_id}:${request.need}`),
+    );
+  }
+
   const supabase = await createClient();
   const { data } = await supabase
     .from("help_requests")
@@ -197,5 +264,11 @@ export async function countPendingRequests(organizationId: string) {
     .eq("organization_id", organizationId)
     .eq("status", "pending");
 
-  return count ?? 0;
+  const demoPending = (await readDemoRequests()).filter(
+    (request) =>
+      request.organization_id === organizationId &&
+      request.status === "pending",
+  ).length;
+
+  return (count ?? 0) + demoPending;
 }

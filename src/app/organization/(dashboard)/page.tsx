@@ -106,6 +106,21 @@ export default async function OrganizationOverviewPage() {
       </section>
       <Card>
         <CardHeader className="border-b">
+          <CardTitle>Downtown need forecast</CardTitle>
+          <CardDescription>
+            Seasonal outlook across six neighborhoods — use it to plan beds and
+            outreach before peaks.
+          </CardDescription>
+          <Button variant="outline" size="sm" className="mt-3 w-fit" asChild>
+            <Link href="/organization/insights">
+              Open need &amp; capacity insights
+              <ArrowRight data-icon="inline-end" />
+            </Link>
+          </Button>
+        </CardHeader>
+      </Card>
+      <Card>
+        <CardHeader className="border-b">
           <CardTitle>People waiting to connect</CardTitle>
           <CardDescription>
             Participant requests that match your listed services.

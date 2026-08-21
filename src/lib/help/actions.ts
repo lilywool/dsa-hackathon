@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 
 import { isDemoProfile } from "@/lib/auth/demo";
 import { getProfile } from "@/lib/auth/session";
+import {
+  addDemoHelpRequest,
+  isDemoRequestId,
+  updateDemoHelpRequestStatus,
+} from "@/lib/help/demo-store";
 import { isServiceKind } from "@/lib/services";
 import { createClient } from "@/lib/supabase/server";
 import type { RequestStatus } from "@/lib/supabase/database.types";
@@ -17,6 +22,13 @@ const STATUSES: RequestStatus[] = [
   "declined",
 ];
 
+function revalidateHelpPaths() {
+  revalidatePath("/participant/find");
+  revalidatePath("/participant/connections");
+  revalidatePath("/organization/requests");
+  revalidatePath("/organization");
+}
+
 export async function askForHelp(
   _prev: HelpState,
   formData: FormData,
@@ -29,14 +41,14 @@ export async function askForHelp(
   }
 
   const profile = await getProfile();
-  if (!profile || isDemoProfile(profile) || profile.role !== "participant") {
+  if (!profile || profile.role !== "participant") {
     return { error: "Sign in as a participant to ask for help.", asked: false };
   }
 
   const supabase = await createClient();
   const { data: organization, error: organizationError } = await supabase
     .from("organizations")
-    .select("id, services")
+    .select("id, name, services")
     .eq("id", organizationId)
     .maybeSingle();
 
@@ -51,6 +63,23 @@ export async function askForHelp(
     };
   }
 
+  if (isDemoProfile(profile)) {
+    const result = await addDemoHelpRequest({
+      organizationId: organization.id,
+      organizationName: organization.name,
+      need: needValue,
+      participantName: profile.display_name ?? undefined,
+    });
+
+    if (!result.ok) {
+      revalidateHelpPaths();
+      return { error: null, asked: true };
+    }
+
+    revalidateHelpPaths();
+    return { error: null, asked: true };
+  }
+
   const { error } = await supabase.from("help_requests").insert({
     organization_id: organizationId,
     participant_id: profile.id,
@@ -62,11 +91,7 @@ export async function askForHelp(
     return { error: error.message, asked: false };
   }
 
-  revalidatePath("/participant/find");
-  revalidatePath("/participant/connections");
-  revalidatePath("/organization/requests");
-  revalidatePath("/organization");
-
+  revalidateHelpPaths();
   return { error: null, asked: true };
 }
 
@@ -82,7 +107,16 @@ export async function updateHelpRequestStatus(formData: FormData) {
   }
 
   const profile = await getProfile();
-  if (!profile || isDemoProfile(profile) || profile.role !== "organization") {
+  if (!profile || profile.role !== "organization") {
+    return;
+  }
+
+  if (isDemoProfile(profile) || isDemoRequestId(requestId)) {
+    if (!isDemoProfile(profile)) {
+      return;
+    }
+    await updateDemoHelpRequestStatus(requestId, status);
+    revalidateHelpPaths();
     return;
   }
 
@@ -92,7 +126,5 @@ export async function updateHelpRequestStatus(formData: FormData) {
     .update({ status })
     .eq("id", requestId);
 
-  revalidatePath("/organization/requests");
-  revalidatePath("/organization");
-  revalidatePath("/participant/connections");
+  revalidateHelpPaths();
 }

@@ -16,7 +16,7 @@ export const needLabels = serviceLabels;
 export const needShortLabels = serviceShortLabels;
 
 export const currentParticipant = {
-  firstName: "Alex",
+  firstName: "Prisha",
 };
 
 export { needOptions, isServiceKind as isNeedType };

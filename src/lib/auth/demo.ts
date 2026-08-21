@@ -2,7 +2,7 @@ import type { Profile } from "@/lib/supabase/database.types";
 import { currentParticipant } from "@/lib/placeholder";
 
 export const DEMO_COOKIE = "haven-demo-role";
-export const DEMO_ORG_CODE = "SD-FATHERS-JOES-VILLAGES";
+export const DEMO_ORG_CODE = "SD-FATHER-JOES-VILLAGES";
 
 export type DemoRole = "participant" | "organization";
 
@@ -19,6 +19,8 @@ const demoAccounts = {
 
 const DEMO_PARTICIPANT_ID = "00000000-0000-4000-a000-000000000001";
 const DEMO_ORGANIZATION_ID = "00000000-0000-4000-a000-000000000002";
+
+export { DEMO_PARTICIPANT_ID, DEMO_ORGANIZATION_ID };
 
 export function matchDemoAccount(
   email: string,

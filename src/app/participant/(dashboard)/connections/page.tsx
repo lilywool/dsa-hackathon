@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { StatusBadge, NeedBadge } from "@/components/status-badges";
 import { Button } from "@/components/ui/button";
-import { isDemoProfile } from "@/lib/auth/demo";
 import { requireParticipant } from "@/lib/auth/session";
 import { listParticipantConnections } from "@/lib/help/queries";
 
@@ -12,9 +11,7 @@ export const metadata = {
 
 export default async function ParticipantConnectionsPage() {
   const profile = await requireParticipant();
-  const connections = isDemoProfile(profile)
-    ? []
-    : await listParticipantConnections(profile.id);
+  const connections = await listParticipantConnections(profile.id);
 
   return (
     <div className="space-y-6">

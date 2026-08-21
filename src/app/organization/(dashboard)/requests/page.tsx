@@ -1,5 +1,4 @@
 import { RequestsPanel } from "@/components/organization/requests-panel";
-import { isDemoProfile } from "@/lib/auth/demo";
 import { requireOrganization } from "@/lib/auth/session";
 import { getOwnedOrganization, listIncomingRequests } from "@/lib/help/queries";
 import { serviceShortLabels } from "@/lib/services";
@@ -12,7 +11,7 @@ export default async function OrganizationRequestsPage() {
   const profile = await requireOrganization();
   const organization = await getOwnedOrganization(profile);
   const services = organization?.services ?? [];
-  const persist = !isDemoProfile(profile) && Boolean(organization?.id);
+  const persist = Boolean(organization?.id);
   const requests = organization?.id
     ? await listIncomingRequests(organization.id, services)
     : [];

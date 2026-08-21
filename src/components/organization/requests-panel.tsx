@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { NeedBadge, StatusBadge } from "@/components/status-badges";
 import { updateHelpRequestStatus } from "@/lib/help/actions";
-import type { IncomingRequest, RequestStatus } from "@/lib/help/queries";
+import type { IncomingRequest } from "@/lib/help/queries";
+import type { RequestStatus } from "@/lib/supabase/database.types";
 
 export function RequestsPanel({
   requests: initialRequests,
