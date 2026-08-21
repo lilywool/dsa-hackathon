@@ -7,7 +7,8 @@ import {
 import { currentParticipant } from "@/lib/placeholder";
 import type { RequestStatus, ServiceKind } from "@/lib/supabase/database.types";
 
-export const DEMO_REQUESTS_COOKIE = "haven-demo-requests";
+export const DEMO_REQUESTS_COOKIE = "haven-demo-requests-v2";
+const LEGACY_DEMO_REQUESTS_COOKIE = "haven-demo-requests";
 
 export type DemoHelpRequest = {
   id: string;
@@ -46,8 +47,19 @@ export async function readDemoRequests(): Promise<DemoHelpRequest[]> {
   }
 }
 
+/** Drop the pre-v2 demo request cookie (safe to call from Server Actions). */
+export async function clearLegacyDemoRequestsCookie() {
+  const cookieStore = await cookies();
+  if (cookieStore.get(LEGACY_DEMO_REQUESTS_COOKIE)) {
+    cookieStore.delete(LEGACY_DEMO_REQUESTS_COOKIE);
+  }
+}
+
 async function writeDemoRequests(requests: DemoHelpRequest[]) {
   const cookieStore = await cookies();
+  if (cookieStore.get(LEGACY_DEMO_REQUESTS_COOKIE)) {
+    cookieStore.delete(LEGACY_DEMO_REQUESTS_COOKIE);
+  }
   cookieStore.set(DEMO_REQUESTS_COOKIE, JSON.stringify(requests.slice(0, 50)), {
     ...cookieOptions(),
   });

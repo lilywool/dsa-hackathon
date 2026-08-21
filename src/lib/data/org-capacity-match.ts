@@ -12,7 +12,7 @@ function slugifyOrgName(name: string) {
     .replace(/^-|-$/g, "");
 }
 
-/** Map directory org_id like SD-FATHER-JOES-VILLAGES → father-joes-villages */
+/** Map directory org_id like SD-JACOBS-CUSHMAN-SAN-DIEGO-FOOD-BANK → jacobs-cushman-san-diego-food-bank */
 export function orgIdToCapacityKey(orgId: string | null | undefined) {
   if (!orgId) {
     return null;

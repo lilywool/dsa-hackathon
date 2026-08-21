@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { DEMO_COOKIE, matchDemoAccount, type DemoRole } from "@/lib/auth/demo";
 import { ORG_VERIFIED_COOKIE, REVIEW_COOKIE } from "@/lib/auth/session";
+import { clearLegacyDemoRequestsCookie } from "@/lib/help/demo-store";
 import { SERVICE_KINDS } from "@/lib/services";
 import { createClient } from "@/lib/supabase/server";
 import type { ServiceKind } from "@/lib/supabase/database.types";
@@ -75,6 +76,7 @@ async function completeDemoSignIn(role: DemoRole): Promise<never> {
   }
 
   await setDemoRole(role);
+  await clearLegacyDemoRequestsCookie();
   redirect(role === "organization" ? "/organization" : "/participant");
 }
 
