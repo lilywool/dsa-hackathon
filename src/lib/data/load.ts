@@ -2,6 +2,7 @@ import type {
   BlockNeedProps,
   FeatureCollection,
   NeighborhoodTrendProps,
+  OrgCapacityGeoProps,
   OrgCapacityRow,
   ServiceLocationProps,
   TransitStopProps,
@@ -41,4 +42,10 @@ export function loadTransitAccessibility() {
 
 export function loadOrgCapacity() {
   return fetchJson<OrgCapacityRow[]>("/data/org_capacity.json");
+}
+
+export function loadOrgCapacityGeo() {
+  return fetchJson<FeatureCollection<OrgCapacityGeoProps>>(
+    "/data/org_capacity.geojson",
+  );
 }

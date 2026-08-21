@@ -81,6 +81,10 @@ export type OrgCapacityRow = {
   org_wide_total_flag: boolean;
 };
 
+export type OrgCapacityGeoProps = OrgCapacityRow & {
+  inside_downtown_boundary?: boolean;
+};
+
 export type ForecastPoint = {
   date: string;
   value: number;

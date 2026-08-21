@@ -21,6 +21,7 @@ import type {
 
 export type OwnedOrganization = {
   id: string | null;
+  org_id?: string | null;
   name: string;
   location: string;
   services: ServiceKind[];
@@ -73,7 +74,7 @@ const loadOwnedOrganization = cache(
     if (isDemoOrganizationId(profileId)) {
       const { data } = await supabase
         .from("organizations")
-        .select("id, name, location, services, website, phone, notes")
+        .select("id, org_id, name, location, services, website, phone, notes")
         .eq("org_id", DEMO_ORG_CODE)
         .maybeSingle();
 
@@ -84,7 +85,7 @@ const loadOwnedOrganization = cache(
 
     const { data } = await supabase
       .from("organizations")
-      .select("id, name, location, services, website, phone, notes")
+      .select("id, org_id, name, location, services, website, phone, notes")
       .eq("owner_id", profileId)
       .maybeSingle();
 

@@ -29,7 +29,7 @@ const navItems = [
   { href: "/organization", label: "Overview", icon: LayoutDashboard },
   { href: "/organization/requests", label: "Incoming requests", icon: ClipboardList },
   { href: "/organization/insights", label: "Need & capacity", icon: LineChart },
-  { href: "/organization/programs", label: "Programs & capacity", icon: BedDouble },
+  { href: "/organization/programs", label: "Services offered", icon: BedDouble },
   { href: "/organization/people", label: "People connected", icon: Users },
 ];
 

@@ -2,14 +2,17 @@
 
 import { useEffect, useMemo } from "react";
 import {
+  CircleMarker,
   GeoJSON,
   MapContainer,
+  Popup,
   TileLayer,
   useMap,
 } from "react-leaflet";
 import type { Layer, PathOptions, StyleFunction } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+import type { CapacitySiteMarker } from "@/lib/data/capacity-geo";
 import { needColorScale, DOWNTOWN_CENTER } from "@/lib/data/geo";
 import { neighborhoodForecastKey } from "@/lib/data/forecast";
 import type {
@@ -25,13 +28,15 @@ type Props = {
   excludeNoPanel: boolean;
   maxValue: number;
   onSelectNeighborhood: (neighborhood: string) => void;
+  capacitySites?: CapacitySiteMarker[];
+  showHighCapacity?: boolean;
 };
 
-function FitDowntown() {
+function FitDowntown({ widen }: { widen: boolean }) {
   const map = useMap();
   useEffect(() => {
-    map.setView(DOWNTOWN_CENTER, 14);
-  }, [map]);
+    map.setView(DOWNTOWN_CENTER, widen ? 12 : 14);
+  }, [map, widen]);
   return null;
 }
 
@@ -42,6 +47,8 @@ export function ForecastChoropleth({
   excludeNoPanel,
   maxValue,
   onSelectNeighborhood,
+  capacitySites = [],
+  showHighCapacity = true,
 }: Props) {
   const visible = useMemo(
     () => ({
@@ -106,6 +113,8 @@ export function ForecastChoropleth({
     });
   };
 
+  const sites = showHighCapacity ? capacitySites : [];
+
   return (
     <div className="overflow-hidden rounded-xl ring-1 ring-foreground/10">
       <MapContainer
@@ -119,13 +128,49 @@ export function ForecastChoropleth({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <FitDowntown />
+        <FitDowntown widen={sites.some((site) => !site.insideDowntown)} />
         <GeoJSON
           key={`${selectedNeighborhood}-${excludeNoPanel}-${valueSignature}`}
           data={visible as GeoJSON.FeatureCollection}
           style={styleFor}
           onEachFeature={onEachFeature as never}
         />
+        {sites.map((site) => (
+          <CircleMarker
+            key={site.id}
+            center={[site.lat, site.lng]}
+            radius={9}
+            pathOptions={{
+              color: "#1f4f4a",
+              fillColor: "#2f6f68",
+              fillOpacity: 0.95,
+              weight: 2,
+            }}
+          >
+            <Popup>
+              <div className="max-w-[220px] space-y-1.5 text-sm">
+                <p className="font-medium">{site.organization}</p>
+                <p className="text-xs text-muted-foreground">
+                  HIGH confidence capacity
+                  {!site.insideDowntown ? " · outside downtown core" : ""}
+                </p>
+                <ul className="space-y-1 text-xs">
+                  {site.rows.map((row) => (
+                    <li key={`${row.category}-${row.unit}`}>
+                      <span className="font-medium">{row.category}</span>:{" "}
+                      {Number.isInteger(row.value)
+                        ? row.value
+                        : row.value.toLocaleString(undefined, {
+                            maximumFractionDigits: 1,
+                          })}{" "}
+                      {row.unit}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Popup>
+          </CircleMarker>
+        ))}
       </MapContainer>
     </div>
   );

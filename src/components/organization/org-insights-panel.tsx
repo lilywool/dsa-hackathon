@@ -29,11 +29,16 @@ import {
   formatMonthLabel,
   neighborhoodForecastKey,
 } from "@/lib/data/forecast";
+import {
+  groupHighCapacitySites,
+  type CapacitySiteMarker,
+} from "@/lib/data/capacity-geo";
 import { needColorScale } from "@/lib/data/geo";
 import {
   loadBlockNeedHeatmap,
   loadNeighborhoodTrend,
   loadOrgCapacity,
+  loadOrgCapacityGeo,
 } from "@/lib/data/load";
 import type {
   CapacityConfidence,
@@ -82,22 +87,28 @@ export function OrgInsightsPanel() {
       null,
     );
   const [capacity, setCapacity] = useState<OrgCapacityRow[]>([]);
+  const [highCapacitySites, setHighCapacitySites] = useState<
+    CapacitySiteMarker[]
+  >([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedNeighborhood, setSelectedNeighborhood] =
     useState<string>("East Village");
   const [monthIndex, setMonthIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [excludeNoPanel, setExcludeNoPanel] = useState(true);
+  const [showHighCapacity, setShowHighCapacity] = useState(true);
 
   const onLoaded = useEffectEvent(
     (payload: {
       neighborhoods: FeatureCollection<NeighborhoodTrendProps>;
       blocks: FeatureCollection<import("@/lib/data/types").BlockNeedProps>;
       capacity: OrgCapacityRow[];
+      highCapacitySites: CapacitySiteMarker[];
     }) => {
       setNeighborhoods(payload.neighborhoods);
       setBlocks(payload.blocks);
       setCapacity(payload.capacity);
+      setHighCapacitySites(payload.highCapacitySites);
       const names = payload.neighborhoods.features.map(
         (feature) => feature.properties.neighborhood,
       );
@@ -115,8 +126,9 @@ export function OrgInsightsPanel() {
       loadNeighborhoodTrend(),
       loadBlockNeedHeatmap(),
       loadOrgCapacity(),
+      loadOrgCapacityGeo(),
     ])
-      .then(([neighborhoodData, blockData, capacityData]) => {
+      .then(([neighborhoodData, blockData, capacityData, capacityGeo]) => {
         if (cancelled) {
           return;
         }
@@ -124,6 +136,7 @@ export function OrgInsightsPanel() {
           neighborhoods: neighborhoodData,
           blocks: blockData,
           capacity: capacityData,
+          highCapacitySites: groupHighCapacitySites(capacityGeo),
         });
       })
       .catch((err: unknown) => {
@@ -295,6 +308,8 @@ export function OrgInsightsPanel() {
               selectedNeighborhood={selectedNeighborhood}
               excludeNoPanel={excludeNoPanel}
               maxValue={maxValue}
+              capacitySites={highCapacitySites}
+              showHighCapacity={showHighCapacity}
               onSelectNeighborhood={(name) => {
                 const key = neighborhoodForecastKey(name);
                 if (forecastsByNeighborhood.has(key)) {
@@ -329,17 +344,30 @@ export function OrgInsightsPanel() {
                     ) : null}
                   </p>
                 </div>
-                <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={excludeNoPanel}
-                    onChange={(event) =>
-                      setExcludeNoPanel(event.target.checked)
-                    }
-                    className="size-3.5 accent-[oklch(0.4_0.075_175)]"
-                  />
-                  Hide blocks without panel history
-                </label>
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={showHighCapacity}
+                      onChange={(event) =>
+                        setShowHighCapacity(event.target.checked)
+                      }
+                      className="size-3.5 accent-[oklch(0.4_0.075_175)]"
+                    />
+                    HIGH capacity sites
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={excludeNoPanel}
+                      onChange={(event) =>
+                        setExcludeNoPanel(event.target.checked)
+                      }
+                      className="size-3.5 accent-[oklch(0.4_0.075_175)]"
+                    />
+                    Hide blocks without panel history
+                  </label>
+                </div>
               </div>
               <input
                 type="range"
@@ -375,10 +403,21 @@ export function OrgInsightsPanel() {
                   High need (PIT-style count)
                 </span>
               </div>
+              <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-2.5 rounded-full bg-[#2f6f68] ring-2 ring-[#1f4f4a]" />
+                  Teal dots = HIGH confidence capacity sites (click for details)
+                </span>
+              </div>
               <p className="text-[11px] text-muted-foreground">
-                Map color = neighborhood need totals for the selected month (actual
-                history or forecast). Capacity confidence is in the panel on the
-                right — not on this map.
+                Block color = neighborhood need for the selected month. Teal dots
+                = HIGH confidence capacity ({highCapacitySites.reduce(
+                  (sum, site) => sum + site.rows.length,
+                  0,
+                )}{" "}
+                of 14 HIGH rows mapped; 2-1-1 has no point). Some sites sit
+                outside the downtown core — the map zooms out slightly when those
+                are shown.
               </p>
             </div>
           </CardContent>
@@ -509,8 +548,8 @@ export function OrgInsightsPanel() {
               </CardTitle>
               <CardDescription>
                 Of {capacity.length} org×category rows, only published figures
-                should drive hard allocation. Modeled fallbacks are demand
-                proxies — not vacancy.
+                should drive hard allocation. HIGH rows with coordinates appear as
+                teal dots on the need map.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 pt-4">
