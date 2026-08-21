@@ -20,7 +20,7 @@ const needIcons: Record<ServiceKind, typeof BedDouble> = {
   shelter: BedDouble,
   food: UtensilsCrossed,
   healthcare: HeartPulse,
-  work: Briefcase,
+  employment: Briefcase,
   clothing: Shirt,
   other: Sparkles,
 };

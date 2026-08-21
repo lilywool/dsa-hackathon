@@ -6,7 +6,7 @@ export const SERVICE_KINDS: ServiceKind[] = [
   "shelter",
   "food",
   "healthcare",
-  "work",
+  "employment",
   "clothing",
   "other",
 ];
@@ -15,7 +15,7 @@ export const serviceLabels: Record<ServiceKind, string> = {
   shelter: "A place to sleep",
   food: "A meal",
   healthcare: "Health care",
-  work: "Work or training",
+  employment: "Employment or training",
   clothing: "Clothes",
   other: "Something else",
 };
@@ -24,7 +24,7 @@ export const serviceShortLabels: Record<ServiceKind, string> = {
   shelter: "Shelter",
   food: "Food",
   healthcare: "Health",
-  work: "Work",
+  employment: "Employment",
   clothing: "Clothes",
   other: "Other",
 };
@@ -33,7 +33,7 @@ export const servicePrompts: Record<ServiceKind, string> = {
   shelter: "I need a place to sleep",
   food: "I need a meal",
   healthcare: "I need health care",
-  work: "I need work or training",
+  employment: "I need employment or training",
   clothing: "I need clothes",
   other: "I need something else",
 };

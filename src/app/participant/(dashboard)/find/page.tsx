@@ -22,7 +22,7 @@ const filters: { id: ServiceKind | "all"; label: string }[] = [
   { id: "shelter", label: serviceShortLabels.shelter },
   { id: "food", label: serviceShortLabels.food },
   { id: "healthcare", label: serviceShortLabels.healthcare },
-  { id: "work", label: serviceShortLabels.work },
+  { id: "employment", label: serviceShortLabels.employment },
   { id: "clothing", label: serviceShortLabels.clothing },
   { id: "other", label: serviceShortLabels.other },
 ];
@@ -51,8 +51,8 @@ export default async function FindHelpPage({
       <div>
         <h1 className="font-heading text-3xl tracking-tight">Find help</h1>
         <p className="mt-2 text-muted-foreground">
-          Organizations from the database, matched to what you need. “I need a
-          meal” is Food; “I need a place to sleep” is Shelter.
+          San Diego organizations from our resource directory, matched to what
+          you need.
         </p>
       </div>
       <div className="-mx-4 overflow-x-auto px-4">
@@ -101,7 +101,17 @@ export default async function FindHelpPage({
                   <p className="mt-1 text-sm text-muted-foreground">
                     {org.neighborhood}
                   </p>
-                  <p className="mt-3 text-sm">{org.highlight}</p>
+                  <p className="mt-3 text-sm leading-relaxed">{org.highlight}</p>
+                  {org.website ? (
+                    <a
+                      href={org.website}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-2 inline-block text-sm text-primary underline-offset-4 hover:underline"
+                    >
+                      Visit website
+                    </a>
+                  ) : null}
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {org.services.map((service) => (
                       <NeedBadge key={service} need={service} />

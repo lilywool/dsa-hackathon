@@ -22,7 +22,7 @@ const services: NeedType[] = [
   "shelter",
   "food",
   "healthcare",
-  "work",
+  "employment",
   "clothing",
   "other",
 ];

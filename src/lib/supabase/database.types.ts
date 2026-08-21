@@ -102,6 +102,9 @@ export type Database = {
           org_id: string;
           owner_id: string | null;
           services: Database["public"]["Enums"]["service_kind"][];
+          website: string | null;
+          phone: string | null;
+          notes: string | null;
         };
         Insert: {
           created_at?: string;
@@ -111,6 +114,9 @@ export type Database = {
           org_id: string;
           owner_id?: string | null;
           services: Database["public"]["Enums"]["service_kind"][];
+          website?: string | null;
+          phone?: string | null;
+          notes?: string | null;
         };
         Update: {
           created_at?: string;
@@ -120,6 +126,9 @@ export type Database = {
           org_id?: string;
           owner_id?: string | null;
           services?: Database["public"]["Enums"]["service_kind"][];
+          website?: string | null;
+          phone?: string | null;
+          notes?: string | null;
         };
         Relationships: [];
       };
@@ -190,7 +199,7 @@ export type Database = {
         | "shelter"
         | "food"
         | "healthcare"
-        | "work"
+        | "employment"
         | "clothing"
         | "other";
     };

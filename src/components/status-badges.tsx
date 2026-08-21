@@ -2,25 +2,12 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   needShortLabels,
-  urgencyLabels,
   type NeedType,
   type RequestStatus,
-  type Urgency,
 } from "@/lib/placeholder";
 
 export function NeedBadge({ need }: { need: NeedType }) {
   return <Badge variant="secondary">{needShortLabels[need]}</Badge>;
-}
-
-export function UrgencyBadge({ urgency }: { urgency: Urgency }) {
-  return (
-    <Badge
-      variant={urgency === "today" ? "destructive" : "outline"}
-      className={cn(urgency === "today" && "font-medium")}
-    >
-      {urgencyLabels[urgency]}
-    </Badge>
-  );
 }
 
 export function StatusBadge({ status }: { status: RequestStatus }) {

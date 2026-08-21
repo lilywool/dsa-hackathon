@@ -6,9 +6,9 @@ import { Check, Clock } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { NeedBadge, StatusBadge, UrgencyBadge } from "@/components/status-badges";
+import { NeedBadge, StatusBadge } from "@/components/status-badges";
 import { updateHelpRequestStatus } from "@/lib/help/actions";
-import type { IncomingRequest, RequestStatus } from "@/lib/placeholder";
+import type { IncomingRequest, RequestStatus } from "@/lib/help/queries";
 
 export function RequestsPanel({
   requests: initialRequests,
@@ -88,7 +88,6 @@ function RequestCard({
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-medium">{request.name}</p>
             <NeedBadge need={request.need} />
-            {request.urgency ? <UrgencyBadge urgency={request.urgency} /> : null}
             {request.status !== "pending" ? (
               <StatusBadge status={request.status} />
             ) : null}
