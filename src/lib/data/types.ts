@@ -42,6 +42,35 @@ export type BlockNeedProps = {
   history: BlockHistoryPoint[];
 };
 
+export type GetItDoneEncampmentProps = {
+  block_id: string;
+  neighborhood: string;
+  total_reports: number;
+  latest_year: string;
+  latest_year_reports: number;
+  reports_by_year: Record<string, number>;
+  /** Sparse: months with no reports for this block are omitted. Missing = 0. */
+  reports_by_month: Record<string, number>;
+  latest_month: string;
+};
+
+export type GetItDoneEncampmentTrendYear = {
+  year: number;
+  downtown_total: number;
+  attributed_to_block: number;
+  blocks_with_reports: number;
+};
+
+export type GetItDoneEncampmentTrend = {
+  note: string;
+  coverage: string;
+  caveats: {
+    "2016_2017": string;
+    "2025": string;
+  };
+  years: GetItDoneEncampmentTrendYear[];
+};
+
 export type ServiceLocationProps = {
   organization: string;
   org_key: string;
@@ -91,4 +120,33 @@ export type ForecastPoint = {
   lower: number;
   upper: number;
   kind: "history" | "forecast";
+};
+
+export type HudPitYear = {
+  year: number;
+  overall: number;
+  sheltered: number;
+  unsheltered: number;
+  methodology_break: boolean;
+};
+
+export type HudPitSeries = {
+  label: string;
+  years: HudPitYear[];
+};
+
+export type HudPitBenchmark = {
+  note: string;
+  scale_warning: string;
+  caveats: {
+    "2021": string;
+    cadence: string;
+  };
+  source: string;
+  series: {
+    san_diego_coc: HudPitSeries;
+    california: HudPitSeries;
+    san_diego_coc_veterans: HudPitSeries;
+    california_veterans: HudPitSeries;
+  };
 };

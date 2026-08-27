@@ -1,0 +1,391 @@
+{
+ "note": "Get It Done 311 'Encampment' and 'Homeless Outreach' requests, counted per block by the month the request was FILED (date_requested). This is complaint volume, NOT a count of people: one encampment can generate many repeat reports, and reporting rates shift with public attention and policy pushes independently of the underlying population. Never sum with, take a ratio against, or reuse the symbology of the observed individuals/tents/vehicles counts in block_need_heatmap.geojson, which are physical street-count observations.",
+ "coverage": "Requests are point-in-polygon matched to the 288 downtown block polygons. Roughly 6-7% of in-boundary requests fall between block polygons (the blocks are street segments and do not tile the full boundary) and are counted in downtown_total but not attributed to any block.",
+ "caveats": {
+  "basis": "Source files are grouped by closure year, so a request filed in 2022 can appear in the 2024 file. These counts are re-keyed to the month the request was FILED, which is why yearly totals differ slightly from the source files' own per-file counts.",
+  "coverage": "Only requests that fall inside one of the 288 downtown block polygons are counted; roughly 6-7% of in-boundary requests land between blocks, since the blocks are street segments and do not tile the full boundary.",
+  "2025": "Partial year at time of extract. Do not read as a full-year decline.",
+  "start": "First encampment/outreach request in this data is 2018-08; the categories did not exist earlier."
+ },
+ "years": [
+  {
+   "year": 2018,
+   "attributed_to_block": 213
+  },
+  {
+   "year": 2019,
+   "attributed_to_block": 533
+  },
+  {
+   "year": 2020,
+   "attributed_to_block": 5031
+  },
+  {
+   "year": 2021,
+   "attributed_to_block": 6952
+  },
+  {
+   "year": 2022,
+   "attributed_to_block": 14981
+  },
+  {
+   "year": 2023,
+   "attributed_to_block": 24858
+  },
+  {
+   "year": 2024,
+   "attributed_to_block": 18985
+  },
+  {
+   "year": 2025,
+   "attributed_to_block": 7390
+  }
+ ],
+ "basis": "date_requested (filed), not date_closed",
+ "months": [
+  {
+   "month": "2018-08",
+   "attributed_to_block": 2
+  },
+  {
+   "month": "2018-09",
+   "attributed_to_block": 49
+  },
+  {
+   "month": "2018-10",
+   "attributed_to_block": 65
+  },
+  {
+   "month": "2018-11",
+   "attributed_to_block": 46
+  },
+  {
+   "month": "2018-12",
+   "attributed_to_block": 51
+  },
+  {
+   "month": "2019-01",
+   "attributed_to_block": 48
+  },
+  {
+   "month": "2019-02",
+   "attributed_to_block": 38
+  },
+  {
+   "month": "2019-03",
+   "attributed_to_block": 18
+  },
+  {
+   "month": "2019-04",
+   "attributed_to_block": 23
+  },
+  {
+   "month": "2019-05",
+   "attributed_to_block": 20
+  },
+  {
+   "month": "2019-06",
+   "attributed_to_block": 21
+  },
+  {
+   "month": "2019-07",
+   "attributed_to_block": 41
+  },
+  {
+   "month": "2019-08",
+   "attributed_to_block": 50
+  },
+  {
+   "month": "2019-09",
+   "attributed_to_block": 79
+  },
+  {
+   "month": "2019-10",
+   "attributed_to_block": 49
+  },
+  {
+   "month": "2019-11",
+   "attributed_to_block": 45
+  },
+  {
+   "month": "2019-12",
+   "attributed_to_block": 101
+  },
+  {
+   "month": "2020-01",
+   "attributed_to_block": 184
+  },
+  {
+   "month": "2020-02",
+   "attributed_to_block": 222
+  },
+  {
+   "month": "2020-03",
+   "attributed_to_block": 194
+  },
+  {
+   "month": "2020-04",
+   "attributed_to_block": 255
+  },
+  {
+   "month": "2020-05",
+   "attributed_to_block": 363
+  },
+  {
+   "month": "2020-06",
+   "attributed_to_block": 552
+  },
+  {
+   "month": "2020-07",
+   "attributed_to_block": 779
+  },
+  {
+   "month": "2020-08",
+   "attributed_to_block": 597
+  },
+  {
+   "month": "2020-09",
+   "attributed_to_block": 450
+  },
+  {
+   "month": "2020-10",
+   "attributed_to_block": 433
+  },
+  {
+   "month": "2020-11",
+   "attributed_to_block": 435
+  },
+  {
+   "month": "2020-12",
+   "attributed_to_block": 567
+  },
+  {
+   "month": "2021-01",
+   "attributed_to_block": 595
+  },
+  {
+   "month": "2021-02",
+   "attributed_to_block": 697
+  },
+  {
+   "month": "2021-03",
+   "attributed_to_block": 727
+  },
+  {
+   "month": "2021-04",
+   "attributed_to_block": 718
+  },
+  {
+   "month": "2021-05",
+   "attributed_to_block": 644
+  },
+  {
+   "month": "2021-06",
+   "attributed_to_block": 530
+  },
+  {
+   "month": "2021-07",
+   "attributed_to_block": 534
+  },
+  {
+   "month": "2021-08",
+   "attributed_to_block": 503
+  },
+  {
+   "month": "2021-09",
+   "attributed_to_block": 472
+  },
+  {
+   "month": "2021-10",
+   "attributed_to_block": 499
+  },
+  {
+   "month": "2021-11",
+   "attributed_to_block": 424
+  },
+  {
+   "month": "2021-12",
+   "attributed_to_block": 609
+  },
+  {
+   "month": "2022-01",
+   "attributed_to_block": 986
+  },
+  {
+   "month": "2022-02",
+   "attributed_to_block": 933
+  },
+  {
+   "month": "2022-03",
+   "attributed_to_block": 1315
+  },
+  {
+   "month": "2022-04",
+   "attributed_to_block": 1002
+  },
+  {
+   "month": "2022-05",
+   "attributed_to_block": 1194
+  },
+  {
+   "month": "2022-06",
+   "attributed_to_block": 1358
+  },
+  {
+   "month": "2022-07",
+   "attributed_to_block": 1352
+  },
+  {
+   "month": "2022-08",
+   "attributed_to_block": 1297
+  },
+  {
+   "month": "2022-09",
+   "attributed_to_block": 1337
+  },
+  {
+   "month": "2022-10",
+   "attributed_to_block": 1266
+  },
+  {
+   "month": "2022-11",
+   "attributed_to_block": 1451
+  },
+  {
+   "month": "2022-12",
+   "attributed_to_block": 1490
+  },
+  {
+   "month": "2023-01",
+   "attributed_to_block": 1467
+  },
+  {
+   "month": "2023-02",
+   "attributed_to_block": 1208
+  },
+  {
+   "month": "2023-03",
+   "attributed_to_block": 1723
+  },
+  {
+   "month": "2023-04",
+   "attributed_to_block": 1835
+  },
+  {
+   "month": "2023-05",
+   "attributed_to_block": 2514
+  },
+  {
+   "month": "2023-06",
+   "attributed_to_block": 1642
+  },
+  {
+   "month": "2023-07",
+   "attributed_to_block": 1848
+  },
+  {
+   "month": "2023-08",
+   "attributed_to_block": 2628
+  },
+  {
+   "month": "2023-09",
+   "attributed_to_block": 2084
+  },
+  {
+   "month": "2023-10",
+   "attributed_to_block": 2266
+  },
+  {
+   "month": "2023-11",
+   "attributed_to_block": 2845
+  },
+  {
+   "month": "2023-12",
+   "attributed_to_block": 2798
+  },
+  {
+   "month": "2024-01",
+   "attributed_to_block": 3095
+  },
+  {
+   "month": "2024-02",
+   "attributed_to_block": 2097
+  },
+  {
+   "month": "2024-03",
+   "attributed_to_block": 1683
+  },
+  {
+   "month": "2024-04",
+   "attributed_to_block": 1636
+  },
+  {
+   "month": "2024-05",
+   "attributed_to_block": 1601
+  },
+  {
+   "month": "2024-06",
+   "attributed_to_block": 1435
+  },
+  {
+   "month": "2024-07",
+   "attributed_to_block": 1669
+  },
+  {
+   "month": "2024-08",
+   "attributed_to_block": 1297
+  },
+  {
+   "month": "2024-09",
+   "attributed_to_block": 1342
+  },
+  {
+   "month": "2024-10",
+   "attributed_to_block": 1262
+  },
+  {
+   "month": "2024-11",
+   "attributed_to_block": 1069
+  },
+  {
+   "month": "2024-12",
+   "attributed_to_block": 799
+  },
+  {
+   "month": "2025-01",
+   "attributed_to_block": 802
+  },
+  {
+   "month": "2025-02",
+   "attributed_to_block": 759
+  },
+  {
+   "month": "2025-03",
+   "attributed_to_block": 894
+  },
+  {
+   "month": "2025-04",
+   "attributed_to_block": 792
+  },
+  {
+   "month": "2025-05",
+   "attributed_to_block": 908
+  },
+  {
+   "month": "2025-06",
+   "attributed_to_block": 882
+  },
+  {
+   "month": "2025-07",
+   "attributed_to_block": 847
+  },
+  {
+   "month": "2025-08",
+   "attributed_to_block": 941
+  },
+  {
+   "month": "2025-09",
+   "attributed_to_block": 565
+  }
+ ]
+}

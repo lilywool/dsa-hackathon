@@ -42,6 +42,9 @@ import {
 import { ServiceCapacityPanel } from "@/components/organization/service-capacity-panel";
 import {
   loadBlockNeedHeatmap,
+  loadGetItDoneEncampmentBlocks,
+  loadGetItDoneEncampmentTrend,
+  loadHudPitBenchmark,
   loadNeighborhoodTrend,
   loadOrgCapacity,
   loadOrgCapacityGeo,
@@ -57,6 +60,9 @@ import {
 import type {
   FeatureCollection,
   ForecastPoint,
+  GetItDoneEncampmentProps,
+  GetItDoneEncampmentTrend,
+  HudPitBenchmark,
   NeighborhoodTrendProps,
   OrgCapacityGeoProps,
   OrgCapacityRow,
@@ -112,6 +118,18 @@ export function OrgInsightsPanel({
   const [excludeNoPanel, setExcludeNoPanel] = useState(true);
   const [showCapacity, setShowCapacity] = useState(true);
   const [showTransit, setShowTransit] = useState(true);
+  const [showHudBenchmark, setShowHudBenchmark] = useState(false);
+  // California is ~18x San Diego's count, so sharing one axis flattens San
+  // Diego to the baseline. Kept as a separate opt-in rather than on by default.
+  const [showHudCalifornia, setShowHudCalifornia] = useState(false);
+  const [hudBenchmark, setHudBenchmark] = useState<HudPitBenchmark | null>(
+    null,
+  );
+  const [encampmentBlocks, setEncampmentBlocks] =
+    useState<FeatureCollection<GetItDoneEncampmentProps> | null>(null);
+  const [encampmentTrend, setEncampmentTrend] =
+    useState<GetItDoneEncampmentTrend | null>(null);
+  const [mapLayer, setMapLayer] = useState<"pit" | "encampment">("pit");
   const [mapServiceFilter, setMapServiceFilter] = useState<ServiceKind>(
     () => primaryServices[0] ?? "shelter",
   );
@@ -124,7 +142,10 @@ export function OrgInsightsPanel({
   const onLoaded = useEffectEvent(
     (payload: {
       neighborhoods: FeatureCollection<NeighborhoodTrendProps>;
+      hudBenchmark: HudPitBenchmark;
       blocks: FeatureCollection<import("@/lib/data/types").BlockNeedProps>;
+      encampmentBlocks: FeatureCollection<GetItDoneEncampmentProps>;
+      encampmentTrend: GetItDoneEncampmentTrend;
       capacity: OrgCapacityRow[];
       capacityGeo: FeatureCollection<OrgCapacityGeoProps>;
       transitStops: TransitStopPoint[];
@@ -132,7 +153,10 @@ export function OrgInsightsPanel({
       explicitOffers: ExplicitServiceIndex;
     }) => {
       setNeighborhoods(payload.neighborhoods);
+      setHudBenchmark(payload.hudBenchmark);
       setBlocks(payload.blocks);
+      setEncampmentBlocks(payload.encampmentBlocks);
+      setEncampmentTrend(payload.encampmentTrend);
       setCapacity(payload.capacity);
       setCapacityGeo(payload.capacityGeo);
       setTransitStops(payload.transitStops);
@@ -153,7 +177,10 @@ export function OrgInsightsPanel({
     let cancelled = false;
     Promise.all([
       loadNeighborhoodTrend(),
+      loadHudPitBenchmark(),
       loadBlockNeedHeatmap(),
+      loadGetItDoneEncampmentBlocks(),
+      loadGetItDoneEncampmentTrend(),
       loadOrgCapacity(),
       loadOrgCapacityGeo(),
       loadServiceLocations(),
@@ -162,7 +189,10 @@ export function OrgInsightsPanel({
       .then(
         ([
           neighborhoodData,
+          hudBenchmarkData,
           blockData,
+          encampmentBlockData,
+          encampmentTrendData,
           capacityData,
           capacityGeoData,
           serviceLocations,
@@ -174,7 +204,10 @@ export function OrgInsightsPanel({
           const stops = extractTransitStops(transitGeo);
           onLoaded({
             neighborhoods: neighborhoodData,
+            hudBenchmark: hudBenchmarkData,
             blocks: blockData,
+            encampmentBlocks: encampmentBlockData,
+            encampmentTrend: encampmentTrendData,
             capacity: capacityData,
             capacityGeo: capacityGeoData,
             transitStops: stops,
@@ -294,15 +327,101 @@ export function OrgInsightsPanel({
 
   const chartData = useMemo(() => {
     const series = forecastsByNeighborhood.get(selectedNeighborhood) ?? [];
-                return series.map((point) => ({
-      date: point.date,
-      label: formatMonthLabel(point.date),
-      observed: point.kind === "history" ? point.value : null,
-      forecast: point.kind === "forecast" ? point.value : null,
-      lower: point.kind === "forecast" ? point.lower : null,
-      upper: point.kind === "forecast" ? point.upper : null,
-    }));
-  }, [forecastsByNeighborhood, selectedNeighborhood]);
+
+    // HUD PIT is one observation per year, taken on a single night in late
+    // January, while this chart's x axis is monthly. Each year's value is
+    // attached to that year's January row so it rides the same axis; the
+    // eleven months in between are null and the Line bridges them with
+    // connectNulls.
+    //
+    // The series is split into "pre" and "post" keys around HUD's own
+    // methodology break (2021 was a sheltered-only count, flagged in the data
+    // via count_type). Two keys rather than one null gap because connectNulls
+    // would otherwise bridge straight over the break and imply a real drop.
+    type HudSlot = {
+      sanDiegoPre: number | null;
+      sanDiegoPost: number | null;
+      californiaPre: number | null;
+      californiaPost: number | null;
+    };
+    const EMPTY: HudSlot = {
+      sanDiegoPre: null,
+      sanDiegoPost: null,
+      californiaPre: null,
+      californiaPost: null,
+    };
+    const hudByYear = new Map<number, HudSlot>();
+
+    if (hudBenchmark) {
+      const allYears = [
+        ...hudBenchmark.series.san_diego_coc.years,
+        ...hudBenchmark.series.california.years,
+      ];
+      const breakYears = allYears
+        .filter((entry) => entry.methodology_break)
+        .map((entry) => entry.year);
+      const breakYear = breakYears.length ? Math.min(...breakYears) : null;
+
+      const put = (
+        years: HudPitBenchmark["series"]["san_diego_coc"]["years"],
+        preKey: keyof HudSlot,
+        postKey: keyof HudSlot,
+      ) => {
+        for (const entry of years) {
+          if (entry.methodology_break || entry.overall === null) {
+            continue;
+          }
+          const slot = hudByYear.get(entry.year) ?? { ...EMPTY };
+          const key =
+            breakYear !== null && entry.year > breakYear ? postKey : preKey;
+          slot[key] = entry.overall;
+          hudByYear.set(entry.year, slot);
+        }
+      };
+      put(hudBenchmark.series.san_diego_coc.years, "sanDiegoPre", "sanDiegoPost");
+      put(hudBenchmark.series.california.years, "californiaPre", "californiaPost");
+    }
+
+    return series.map((point) => {
+      const year = Number(point.date.slice(0, 4));
+      // Dates are YYYY-MM-01, so check the month explicitly. endsWith("-01")
+      // would match the first of EVERY month, not January.
+      const isJanuary = point.date.slice(5, 7) === "01";
+      const hud = (isJanuary ? hudByYear.get(year) : undefined) ?? EMPTY;
+      return {
+        date: point.date,
+        label: formatMonthLabel(point.date),
+        year,
+        observed: point.kind === "history" ? point.value : null,
+        forecast: point.kind === "forecast" ? point.value : null,
+        lower: point.kind === "forecast" ? point.lower : null,
+        upper: point.kind === "forecast" ? point.upper : null,
+        ...hud,
+      };
+    });
+  }, [forecastsByNeighborhood, selectedNeighborhood, hudBenchmark]);
+
+  // Right axis is sized to the series actually on screen. With California
+  // hidden the axis tops out near San Diego's ~10.6k instead of California's
+  // ~187k, so the San Diego line reads as a real trend instead of a flat line
+  // pinned to the baseline.
+  const hudAxisMax = useMemo(() => {
+    if (!showHudBenchmark) return 0;
+    let max = 0;
+    for (const point of chartData) {
+      const candidates = [point.sanDiegoPre, point.sanDiegoPost];
+      if (showHudCalifornia) {
+        candidates.push(point.californiaPre, point.californiaPost);
+      }
+      for (const value of candidates) {
+        if (typeof value === "number" && value > max) max = value;
+      }
+    }
+    // round up to a clean tick so the axis labels stay readable
+    if (max <= 0) return "auto" as const;
+    const magnitude = 10 ** Math.floor(Math.log10(max));
+    return Math.ceil(max / magnitude) * magnitude;
+  }, [chartData, showHudBenchmark, showHudCalifornia]);
 
   const noPanelCount =
     blocks?.features.filter((feature) => !feature.properties.has_panel_data)
@@ -316,7 +435,7 @@ export function OrgInsightsPanel({
     );
   }
 
-  if (!neighborhoods || !blocks) {
+  if (!neighborhoods || !blocks || !encampmentBlocks || !encampmentTrend) {
     return (
       <p className="text-sm text-muted-foreground">
         Loading downtown need & capacity layers…
@@ -328,6 +447,10 @@ export function OrgInsightsPanel({
     .get(selectedNeighborhood)
     ?.find((point) => point.date === activeDate);
   const isForecastMonth = activePoint?.kind === "forecast";
+  const activeYear = activeDate ? Number(activeDate.slice(0, 4)) : null;
+  // YYYY-MM for the encampment layer, so the map tracks the slider month by
+  // month instead of only stepping when the year rolls over.
+  const activeMonth = activeDate ? activeDate.slice(0, 7) : null;
 
   return (
     <div className="space-y-6">
@@ -347,6 +470,35 @@ export function OrgInsightsPanel({
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
           <div className="space-y-3">
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">
+                Map layer
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <input
+                    type="radio"
+                    name="insights-map-layer"
+                    value="pit"
+                    checked={mapLayer === "pit"}
+                    onChange={() => setMapLayer("pit")}
+                    className="size-3.5 accent-[oklch(0.4_0.075_175)]"
+                  />
+                  PIT population
+                </label>
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <input
+                    type="radio"
+                    name="insights-map-layer"
+                    value="encampment"
+                    checked={mapLayer === "encampment"}
+                    onChange={() => setMapLayer("encampment")}
+                    className="size-3.5 accent-[oklch(0.52_0.14_255)]"
+                  />
+                  311 encampment reports
+                </label>
+              </div>
+            </div>
             <div className="space-y-1.5">
               <p className="text-xs font-medium text-muted-foreground">
                 Resource type on map
@@ -392,6 +544,11 @@ export function OrgInsightsPanel({
 
           <ForecastChoropleth
             blocks={blocks}
+            encampmentBlocks={encampmentBlocks}
+            encampmentTrend={encampmentTrend}
+            activeYear={activeYear}
+            activeMonth={activeMonth}
+            mapLayer={mapLayer}
             pitByBlock={pitByBlock}
             maxPitValue={maxPitValue}
             selectedNeighborhood={selectedNeighborhood}
@@ -542,6 +699,53 @@ export function OrgInsightsPanel({
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
+          <label className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={showHudBenchmark}
+              onChange={(event) => setShowHudBenchmark(event.target.checked)}
+              className="size-3.5 accent-[oklch(0.4_0.075_175)]"
+            />
+            Show HUD regional benchmark
+          </label>
+          {showHudBenchmark ? (
+            <div className="mb-3 space-y-1.5 text-[11px] text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    className="w-4 border-t-2 border-[oklch(0.52_0.14_255)]"
+                    aria-hidden="true"
+                  />
+                  San Diego CoC (regional benchmark)
+                </span>
+                <label className="inline-flex cursor-pointer items-center gap-1.5">
+                  <input
+                    type="checkbox"
+                    checked={showHudCalifornia}
+                    onChange={(event) =>
+                      setShowHudCalifornia(event.target.checked)
+                    }
+                    className="size-3.5 accent-[oklch(0.62_0.13_315)]"
+                  />
+                  <span
+                    className="w-4 border-t-2 border-dashed border-[oklch(0.62_0.13_315)]"
+                    aria-hidden="true"
+                  />
+                  Add California (state benchmark)
+                </label>
+              </div>
+              <p className="text-[10px]">
+                Annual HUD Point-in-Time counts on the right axis, one reading
+                per year taken on a single night each January. Regional totals
+                for the whole San Diego city and county CoC, not downtown, so
+                they give context but are not comparable to the downtown counts
+                on the left axis. 2021 is missing because HUD allowed CoCs to
+                skip the unsheltered count that year. California is roughly 18x
+                San Diego, so turning it on rescales the axis and flattens the
+                San Diego line.
+              </p>
+            </div>
+          ) : null}
           <div className="h-72 w-full sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
@@ -567,6 +771,28 @@ export function OrgInsightsPanel({
                     value="People counted (total)"
                     angle={-90}
                     position="insideLeft"
+                    style={{
+                      fontSize: 12,
+                      fill: "oklch(0.48 0.03 55)",
+                      textAnchor: "middle",
+                    }}
+                  />
+                </YAxis>
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  domain={[0, hudAxisMax]}
+                  allowDecimals={false}
+                  tickFormatter={(value: number) =>
+                    value >= 1000 ? `${Math.round(value / 1000)}k` : String(value)
+                  }
+                  tick={{ fontSize: 10 }}
+                  width={58}
+                >
+                  <Label
+                    value="HUD regional count"
+                    angle={90}
+                    position="insideRight"
                     style={{
                       fontSize: 12,
                       fill: "oklch(0.48 0.03 55)",
@@ -608,7 +834,7 @@ export function OrgInsightsPanel({
                   strokeWidth={2}
                   dot={false}
                   name="Observed (actual)"
-                  connectNulls
+                  connectNulls={false}
                 />
                 <Line
                   type="monotone"
@@ -620,6 +846,58 @@ export function OrgInsightsPanel({
                   name="Forecast (predicted)"
                   connectNulls
                 />
+                {showHudBenchmark ? (
+                  <>
+                    <Line
+                      type="linear"
+                      dataKey="sanDiegoPre"
+                      yAxisId="right"
+                      stroke="oklch(0.52 0.14 255)"
+                      strokeWidth={2}
+                      dot={{ r: 2.5 }}
+                      connectNulls
+                      name="San Diego CoC (regional benchmark)"
+                    />
+                    <Line
+                      type="linear"
+                      dataKey="sanDiegoPost"
+                      yAxisId="right"
+                      stroke="oklch(0.52 0.14 255)"
+                      strokeWidth={2}
+                      dot={{ r: 2.5 }}
+                      connectNulls
+                      legendType="none"
+                      tooltipType="none"
+                    />
+                    {showHudCalifornia ? (
+                      <>
+                    <Line
+                      type="linear"
+                      dataKey="californiaPre"
+                      yAxisId="right"
+                      stroke="oklch(0.62 0.13 315)"
+                      strokeWidth={2}
+                      strokeDasharray="6 4"
+                      dot={{ r: 2.5 }}
+                      connectNulls
+                      name="California (state benchmark)"
+                    />
+                    <Line
+                      type="linear"
+                      dataKey="californiaPost"
+                      yAxisId="right"
+                      stroke="oklch(0.62 0.13 315)"
+                      strokeWidth={2}
+                      strokeDasharray="6 4"
+                      dot={{ r: 2.5 }}
+                      connectNulls
+                      legendType="none"
+                      tooltipType="none"
+                    />
+                      </>
+                    ) : null}
+                  </>
+                ) : null}
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -638,6 +916,24 @@ export function OrgInsightsPanel({
               ) : (
                 <> observed</>
               )}
+            </p>
+          ) : null}
+          {showHudBenchmark && hudBenchmark ? (
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              HUD regional benchmarks are annual January-night counts and use
+              the secondary axis. The 2021 point is omitted because it is a
+              COVID methodology gap, not a real drop. These CoC/state figures
+              are not downtown counts and are not summed with the monthly
+              series. Source:{" "}
+              <a
+                href={hudBenchmark.source}
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2"
+              >
+                HUD PIT/HIC
+              </a>
+              .
             </p>
           ) : null}
         </CardContent>

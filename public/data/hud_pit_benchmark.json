@@ -1,0 +1,473 @@
+{
+ "note": "HUD Point-in-Time (PIT) counts, published annually by the U.S. Department of Housing and Urban Development. REGIONAL BENCHMARK ONLY. These are CoC-level and state-level figures with no sub-geography: they cannot be filtered to downtown San Diego and must never be presented as a downtown number or summed with the downtown street-count series in monthly_trend.json.",
+ "scale_warning": "These counts are one to two orders of magnitude larger than the downtown street counts (SD CoC ~10,605 in 2024 vs. downtown monthly totals in the hundreds). Plot on a secondary axis or as a separate indexed series; a shared linear axis will flatten the downtown line to zero.",
+ "caveats": {
+  "2021": "HUD permitted CoCs to skip the unsheltered count during COVID. The source data marks San Diego's 2021 row Count Types = 'Sheltered-Only Count' (every other year is 'Sheltered and Unsheltered Count'), so 2021 is not comparable to the rest of the series. Use the per-year count_type / methodology_break fields rather than hardcoding the year. Break or annotate the line; never interpolate across it.",
+  "cadence": "One observation per year, taken on a single night in late January."
+ },
+ "source": "https://www.hudexchange.info/programs/hdx/pit-hic/",
+ "series": {
+  "san_diego_coc": {
+   "label": "San Diego City & County CoC (CA-601)",
+   "years": [
+    {
+     "year": 2007,
+     "overall": 7326,
+     "sheltered": 3981,
+     "unsheltered": 3345,
+     "methodology_break": false,
+     "count_type": null
+    },
+    {
+     "year": 2008,
+     "overall": 8455,
+     "sheltered": 4417,
+     "unsheltered": 4038,
+     "methodology_break": false,
+     "count_type": null
+    },
+    {
+     "year": 2009,
+     "overall": 7995,
+     "sheltered": 3981,
+     "unsheltered": 4014,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2010,
+     "overall": 8383,
+     "sheltered": 3918,
+     "unsheltered": 4465,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2011,
+     "overall": 9436,
+     "sheltered": 3980,
+     "unsheltered": 5456,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2012,
+     "overall": 10013,
+     "sheltered": 4371,
+     "unsheltered": 5642,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2013,
+     "overall": 8879,
+     "sheltered": 4305,
+     "unsheltered": 4574,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2014,
+     "overall": 8506,
+     "sheltered": 4521,
+     "unsheltered": 3985,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2015,
+     "overall": 8742,
+     "sheltered": 4586,
+     "unsheltered": 4156,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2016,
+     "overall": 8669,
+     "sheltered": 3729,
+     "unsheltered": 4940,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2017,
+     "overall": 9160,
+     "sheltered": 3539,
+     "unsheltered": 5621,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2018,
+     "overall": 8576,
+     "sheltered": 3586,
+     "unsheltered": 4990,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2019,
+     "overall": 8102,
+     "sheltered": 3626,
+     "unsheltered": 4476,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2020,
+     "overall": 7638,
+     "sheltered": 3667,
+     "unsheltered": 3971,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2021,
+     "overall": 4143,
+     "sheltered": 4143,
+     "unsheltered": 0,
+     "methodology_break": true,
+     "count_type": "Sheltered-Only Count"
+    },
+    {
+     "year": 2022,
+     "overall": 8427,
+     "sheltered": 4321,
+     "unsheltered": 4106,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2023,
+     "overall": 10264,
+     "sheltered": 5093,
+     "unsheltered": 5171,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    },
+    {
+     "year": 2024,
+     "overall": 10605,
+     "sheltered": 4495,
+     "unsheltered": 6110,
+     "methodology_break": false,
+     "count_type": "Sheltered and Unsheltered Count"
+    }
+   ],
+   "identity": "CA-601, San Diego City and County CoC"
+  },
+  "california": {
+   "label": "California (statewide)",
+   "years": [
+    {
+     "year": 2007,
+     "overall": 138986,
+     "sheltered": 48511,
+     "unsheltered": 90475,
+     "methodology_break": false
+    },
+    {
+     "year": 2008,
+     "overall": 136531,
+     "sheltered": 46965,
+     "unsheltered": 89566,
+     "methodology_break": false
+    },
+    {
+     "year": 2009,
+     "overall": 123678,
+     "sheltered": 50777,
+     "unsheltered": 72901,
+     "methodology_break": false
+    },
+    {
+     "year": 2010,
+     "overall": 123480,
+     "sheltered": 50899,
+     "unsheltered": 72581,
+     "methodology_break": false
+    },
+    {
+     "year": 2011,
+     "overall": 125128,
+     "sheltered": 50691,
+     "unsheltered": 74437,
+     "methodology_break": false
+    },
+    {
+     "year": 2012,
+     "overall": 120098,
+     "sheltered": 45890,
+     "unsheltered": 74208,
+     "methodology_break": false
+    },
+    {
+     "year": 2013,
+     "overall": 118552,
+     "sheltered": 45554,
+     "unsheltered": 72998,
+     "methodology_break": false
+    },
+    {
+     "year": 2014,
+     "overall": 113952,
+     "sheltered": 42515,
+     "unsheltered": 71437,
+     "methodology_break": false
+    },
+    {
+     "year": 2015,
+     "overall": 115738,
+     "sheltered": 42039,
+     "unsheltered": 73699,
+     "methodology_break": false
+    },
+    {
+     "year": 2016,
+     "overall": 118142,
+     "sheltered": 39752,
+     "unsheltered": 78390,
+     "methodology_break": false
+    },
+    {
+     "year": 2017,
+     "overall": 131532,
+     "sheltered": 42636,
+     "unsheltered": 88896,
+     "methodology_break": false
+    },
+    {
+     "year": 2018,
+     "overall": 129972,
+     "sheltered": 40429,
+     "unsheltered": 89543,
+     "methodology_break": false
+    },
+    {
+     "year": 2019,
+     "overall": 151278,
+     "sheltered": 42846,
+     "unsheltered": 108432,
+     "methodology_break": false
+    },
+    {
+     "year": 2020,
+     "overall": 161548,
+     "sheltered": 47888,
+     "unsheltered": 113660,
+     "methodology_break": false
+    },
+    {
+     "year": 2021,
+     "overall": 57468,
+     "sheltered": 51429,
+     "unsheltered": 6039,
+     "methodology_break": true
+    },
+    {
+     "year": 2022,
+     "overall": 171521,
+     "sheltered": 56030,
+     "unsheltered": 115491,
+     "methodology_break": false
+    },
+    {
+     "year": 2023,
+     "overall": 181399,
+     "sheltered": 57976,
+     "unsheltered": 123423,
+     "methodology_break": false
+    },
+    {
+     "year": 2024,
+     "overall": 187084,
+     "sheltered": 63110,
+     "unsheltered": 123974,
+     "methodology_break": false
+    }
+   ],
+   "identity": "California statewide, all CoCs"
+  },
+  "san_diego_coc_veterans": {
+   "label": "San Diego CoC, veterans",
+   "years": [
+    {
+     "year": 2011,
+     "overall": 1649,
+     "unsheltered": 893,
+     "methodology_break": false
+    },
+    {
+     "year": 2012,
+     "overall": 1753,
+     "unsheltered": 922,
+     "methodology_break": false
+    },
+    {
+     "year": 2013,
+     "overall": 1486,
+     "unsheltered": 688,
+     "methodology_break": false
+    },
+    {
+     "year": 2014,
+     "overall": 1307,
+     "unsheltered": 517,
+     "methodology_break": false
+    },
+    {
+     "year": 2015,
+     "overall": 1381,
+     "unsheltered": 631,
+     "methodology_break": false
+    },
+    {
+     "year": 2016,
+     "overall": 1156,
+     "unsheltered": 572,
+     "methodology_break": false
+    },
+    {
+     "year": 2017,
+     "overall": 1067,
+     "unsheltered": 454,
+     "methodology_break": false
+    },
+    {
+     "year": 2018,
+     "overall": 1312,
+     "unsheltered": 659,
+     "methodology_break": false
+    },
+    {
+     "year": 2019,
+     "overall": 1068,
+     "unsheltered": 424,
+     "methodology_break": false
+    },
+    {
+     "year": 2020,
+     "overall": 940,
+     "unsheltered": 317,
+     "methodology_break": false
+    },
+    {
+     "year": 2021,
+     "overall": 393,
+     "unsheltered": 0,
+     "methodology_break": true
+    },
+    {
+     "year": 2022,
+     "overall": 686,
+     "unsheltered": 378,
+     "methodology_break": false
+    },
+    {
+     "year": 2023,
+     "overall": 814,
+     "unsheltered": 473,
+     "methodology_break": false
+    },
+    {
+     "year": 2024,
+     "overall": 865,
+     "unsheltered": 544,
+     "methodology_break": false
+    }
+   ]
+  },
+  "california_veterans": {
+   "label": "California, veterans",
+   "years": [
+    {
+     "year": 2011,
+     "overall": 16783,
+     "unsheltered": 10094,
+     "methodology_break": false
+    },
+    {
+     "year": 2012,
+     "overall": 14611,
+     "unsheltered": 10099,
+     "methodology_break": false
+    },
+    {
+     "year": 2013,
+     "overall": 12895,
+     "unsheltered": 8009,
+     "methodology_break": false
+    },
+    {
+     "year": 2014,
+     "overall": 12096,
+     "unsheltered": 7639,
+     "methodology_break": false
+    },
+    {
+     "year": 2015,
+     "overall": 11311,
+     "unsheltered": 7002,
+     "methodology_break": false
+    },
+    {
+     "year": 2016,
+     "overall": 9612,
+     "unsheltered": 5600,
+     "methodology_break": false
+    },
+    {
+     "year": 2017,
+     "overall": 11436,
+     "unsheltered": 7621,
+     "methodology_break": false
+    },
+    {
+     "year": 2018,
+     "overall": 10836,
+     "unsheltered": 7214,
+     "methodology_break": false
+    },
+    {
+     "year": 2019,
+     "overall": 10980,
+     "unsheltered": 7719,
+     "methodology_break": false
+    },
+    {
+     "year": 2020,
+     "overall": 11401,
+     "unsheltered": 7996,
+     "methodology_break": false
+    },
+    {
+     "year": 2021,
+     "overall": 3351,
+     "unsheltered": 139,
+     "methodology_break": true
+    },
+    {
+     "year": 2022,
+     "overall": 10395,
+     "unsheltered": 7392,
+     "methodology_break": false
+    },
+    {
+     "year": 2023,
+     "overall": 10589,
+     "unsheltered": 7436,
+     "methodology_break": false
+    },
+    {
+     "year": 2024,
+     "overall": 9310,
+     "unsheltered": 6410,
+     "methodology_break": false
+    }
+   ]
+  }
+ },
+ "verification": "Spot-checked against HUD's published CoC report for CA-601, 2024: overall 10,605, unsheltered 6,110, sheltered 3,177 emergency + 1,318 transitional = 4,495. Matches this file exactly. https://files.hudexchange.info/reports/published/CoC_PopSub_CoC_CA-601-2024_CA_2024.pdf",
+ "provenance": "Extracted from HUD's published workbook 2007-2024-PIT-Counts-by-CoC.xlsb, taking the CA-601 row from each annual sheet. The San Diego CoC number is stable across the period with no merger events (confirmed against the workbook's own 'CoC Mergers' sheet)."
+}

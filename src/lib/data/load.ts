@@ -1,6 +1,9 @@
 import type {
   BlockNeedProps,
   FeatureCollection,
+  GetItDoneEncampmentProps,
+  GetItDoneEncampmentTrend,
+  HudPitBenchmark,
   NeighborhoodTrendProps,
   OrgCapacityGeoProps,
   OrgCapacityRow,
@@ -19,6 +22,22 @@ async function fetchJson<T>(path: string): Promise<T> {
 export function loadNeighborhoodTrend() {
   return fetchJson<FeatureCollection<NeighborhoodTrendProps>>(
     "/data/neighborhood_trend.geojson",
+  );
+}
+
+export function loadHudPitBenchmark() {
+  return fetchJson<HudPitBenchmark>("/data/hud_pit_benchmark.json");
+}
+
+export function loadGetItDoneEncampmentBlocks() {
+  return fetchJson<FeatureCollection<GetItDoneEncampmentProps>>(
+    "/data/get_it_done_encampment_blocks.geojson",
+  );
+}
+
+export function loadGetItDoneEncampmentTrend() {
+  return fetchJson<GetItDoneEncampmentTrend>(
+    "/data/get_it_done_encampment_trend.json",
   );
 }
 

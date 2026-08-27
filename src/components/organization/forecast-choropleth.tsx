@@ -35,11 +35,18 @@ import type {
   BlockNeedProps,
   FeatureCollection,
   GeoJsonFeature,
+  GetItDoneEncampmentProps,
+  GetItDoneEncampmentTrend,
 } from "@/lib/data/types";
 import { serviceShortLabels, type ServiceKind } from "@/lib/services";
 
 type Props = {
   blocks: FeatureCollection<BlockNeedProps>;
+  encampmentBlocks: FeatureCollection<GetItDoneEncampmentProps>;
+  encampmentTrend: GetItDoneEncampmentTrend;
+  activeYear: number | null;
+  activeMonth: string | null;
+  mapLayer: "pit" | "encampment";
   pitByBlock: Map<string, BlockPitEntry>;
   maxPitValue: number;
   selectedNeighborhood: string;
@@ -84,6 +91,15 @@ function shapeMarkup(shape: CapacityMarkerShape, size: number, fill: string) {
 
 const MARKER_FILL = "#0d9488";
 
+function encampmentColorScale(value: number, maxValue: number) {
+  const ratio = maxValue > 0 ? Math.max(0, Math.min(1, value / maxValue)) : 0;
+  if (ratio === 0) return "#eff6ff";
+  if (ratio < 0.25) return "#bfdbfe";
+  if (ratio < 0.5) return "#60a5fa";
+  if (ratio < 0.75) return "#2563eb";
+  return "#1e3a8a";
+}
+
 function capacityDivIcon(site: CapacitySiteMarker) {
   const size = site.radiusPx;
   return new DivIcon({
@@ -96,11 +112,21 @@ function capacityDivIcon(site: CapacitySiteMarker) {
 
 function MapLegend({
   maxPitValue,
+  maxReportValue,
+  mapLayer,
+  reportYear,
+  reportsAvailable,
+  encampmentTrend,
   serviceFilter,
   showCapacity,
   showTransit,
 }: {
   maxPitValue: number;
+  maxReportValue: number;
+  mapLayer: "pit" | "encampment";
+  reportYear: string | null;
+  reportsAvailable: boolean;
+  encampmentTrend: GetItDoneEncampmentTrend;
   serviceFilter: ServiceKind;
   showCapacity: boolean;
   showTransit: boolean;
@@ -122,36 +148,65 @@ function MapLegend({
       <div>
         <p className="font-medium text-foreground">Map legend</p>
         <p className="mt-0.5 text-muted-foreground">
-          Heatmap = simulated point-in-time (PIT) homeless population per block,
-          allocated from neighborhood PIT totals using block count history.
+          {mapLayer === "encampment"
+            ? "311 encampment reports are complaint volume, not a count of people."
+            : "Heatmap = simulated point-in-time (PIT) homeless population per block, allocated from neighborhood PIT totals using block count history."}{" "}
           Markers = providers for {serviceShortLabels[serviceFilter].toLowerCase()}{" "}
           (size = capacity). Basemap is grayscale so population and transit stay
           readable.
         </p>
       </div>
 
-      <div className="space-y-1.5">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          PIT homeless population (people)
-        </p>
-        <div className="flex items-center gap-2">
-          <span className="tabular-nums text-muted-foreground">Low</span>
-          <div
-            className="h-2.5 flex-1 rounded-full"
-            style={{
-              background: `linear-gradient(90deg, ${needColorScale(0, 1)}, ${needColorScale(0.33, 1)}, ${needColorScale(0.66, 1)}, ${needColorScale(1, 1)})`,
-            }}
-          />
-          <span className="tabular-nums text-muted-foreground">
-            High ({(maxPitValue || 0).toLocaleString()})
-          </span>
+      {mapLayer === "encampment" ? (
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            311 encampment reports (complaint volume, not a count of people)
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="tabular-nums text-muted-foreground">Low</span>
+            <div
+              className="h-2.5 flex-1 rounded-full"
+              style={{
+                background: "linear-gradient(90deg, #eff6ff, #60a5fa, #1e3a8a)",
+              }}
+            />
+            <span className="tabular-nums text-muted-foreground">
+              High ({maxReportValue.toLocaleString()})
+            </span>
+          </div>
+          <p className="text-[10px] text-muted-foreground">
+            {!reportsAvailable
+              ? "No 311 category data is available before 2018."
+              : reportYear
+                ? `Year: ${reportYear}`
+                : "Total reports (available years 2018 to 2025)"}. {" "}
+            {encampmentTrend.caveats["2025"]}
+          </p>
         </div>
-        <div className="flex justify-between text-[10px] text-muted-foreground">
-          <span>Green</span>
-          <span>~{mid.toLocaleString()} mid</span>
-          <span>Red</span>
+      ) : (
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            PIT homeless population (people)
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="tabular-nums text-muted-foreground">Low</span>
+            <div
+              className="h-2.5 flex-1 rounded-full"
+              style={{
+                background: `linear-gradient(90deg, ${needColorScale(0, 1)}, ${needColorScale(0.33, 1)}, ${needColorScale(0.66, 1)}, ${needColorScale(1, 1)})`,
+              }}
+            />
+            <span className="tabular-nums text-muted-foreground">
+              High ({(maxPitValue || 0).toLocaleString()})
+            </span>
+          </div>
+          <div className="flex justify-between text-[10px] text-muted-foreground">
+            <span>Green</span>
+            <span>~{mid.toLocaleString()} mid</span>
+            <span>Red</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {showCapacity ? (
         <div className="space-y-2">
@@ -215,6 +270,11 @@ function MapLegend({
 
 export function ForecastChoropleth({
   blocks,
+  encampmentBlocks,
+  encampmentTrend,
+  activeYear,
+  activeMonth,
+  mapLayer,
   pitByBlock,
   maxPitValue,
   selectedNeighborhood,
@@ -240,6 +300,32 @@ export function ForecastChoropleth({
       ),
     }),
     [blocks, excludeNoPanel],
+  );
+  const reportYear =
+    activeYear && activeYear >= 2018 && activeYear <= 2025
+      ? String(activeYear)
+      : null;
+  const reportsAvailable = activeYear === null || activeYear >= 2018;
+  const reportValues = useMemo(() => {
+    const values = new Map<string, number>();
+    for (const feature of encampmentBlocks.features) {
+      const props = feature.properties;
+      // Prefer the exact month the slider is on. reports_by_month is sparse,
+      // so an absent key means zero reports that month, not missing data.
+      const value =
+        activeMonth && props.reports_by_month
+          ? (props.reports_by_month[activeMonth] ?? 0)
+          : reportYear && props.reports_by_year[reportYear] !== undefined
+            ? props.reports_by_year[reportYear]
+            : props.total_reports;
+      values.set(props.block_id, value);
+    }
+    return values;
+  }, [encampmentBlocks, reportYear, activeMonth]);
+
+  const maxReportValue = useMemo(
+    () => Math.max(1, ...reportValues.values()),
+    [reportValues],
   );
 
   const valueSignature = useMemo(() => {
@@ -283,6 +369,23 @@ export function ForecastChoropleth({
     } satisfies PathOptions;
   };
 
+  const encampmentStyleFor: StyleFunction<GetItDoneEncampmentProps> = (
+    feature,
+  ) => {
+    const props = feature?.properties;
+    if (!props) {
+      return {};
+    }
+    const value = reportValues.get(props.block_id) ?? props.total_reports;
+    const selected = props.neighborhood === selectedNeighborhood;
+    return {
+      fillColor: encampmentColorScale(value, maxReportValue),
+      fillOpacity: selected ? 0.78 : 0.62,
+      color: selected ? "#172554" : "#1d4ed8",
+      weight: selected ? 1.4 : 0.5,
+    } satisfies PathOptions;
+  };
+
   const onEachFeature = (
     feature: GeoJsonFeature<BlockNeedProps>,
     layer: Layer,
@@ -297,6 +400,21 @@ export function ForecastChoropleth({
       : `${props.block_id} · ${props.neighborhood}: no panel history`;
 
     layer.bindTooltip(label, { sticky: true });
+    layer.on({
+      click: () => onSelectNeighborhood(props.neighborhood),
+    });
+  };
+
+  const onEachEncampmentFeature = (
+    feature: GeoJsonFeature<GetItDoneEncampmentProps>,
+    layer: Layer,
+  ) => {
+    const props = feature.properties;
+    const value = reportValues.get(props.block_id) ?? props.total_reports;
+    layer.bindTooltip(
+      `${props.block_id} · ${props.neighborhood}: ${value.toLocaleString()} 311 encampment reports (complaint volume, not a count of people)`,
+      { sticky: true },
+    );
     layer.on({
       click: () => onSelectNeighborhood(props.neighborhood),
     });
@@ -346,12 +464,23 @@ export function ForecastChoropleth({
             url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
           />
           <FitDowntown />
-          <GeoJSON
-            key={`${selectedNeighborhood}-${excludeNoPanel}-${valueSignature}-${serviceFilter}`}
-            data={visible as GeoJSON.FeatureCollection}
-            style={styleFor}
-            onEachFeature={onEachFeature as never}
-          />
+          {mapLayer === "pit" ? (
+            <GeoJSON
+              key={`${selectedNeighborhood}-${excludeNoPanel}-${valueSignature}-${serviceFilter}`}
+              data={visible as GeoJSON.FeatureCollection}
+              style={styleFor}
+              onEachFeature={onEachFeature as never}
+            />
+          ) : reportsAvailable ? (
+            <GeoJSON
+              key={`${selectedNeighborhood}-${activeMonth ?? reportYear}-${mapLayer}-${maxReportValue}`}
+              data={encampmentBlocks as unknown as GeoJSON.FeatureCollection}
+              style={encampmentStyleFor}
+              onEachFeature={onEachEncampmentFeature as never}
+            />
+          ) : (
+            null
+          )}
 
           {showTransit
             ? transitCorridors.map((corridor) => (
@@ -433,6 +562,11 @@ export function ForecastChoropleth({
 
       <MapLegend
         maxPitValue={pitMax}
+        maxReportValue={maxReportValue}
+        mapLayer={mapLayer}
+        reportYear={reportYear}
+        reportsAvailable={reportsAvailable}
+        encampmentTrend={encampmentTrend}
         serviceFilter={serviceFilter}
         showCapacity={showCapacity}
         showTransit={showTransit}

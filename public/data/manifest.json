@@ -1,1 +1,135 @@
-[{"file": "service_locations.geojson", "type": "map layer (Point FeatureCollection)", "purpose": "Every resource org with a resolved point location -- MSBA citywide directory (downtown-relevant subset) merged with the Community Org Directory, deduped to one feature per physical site.", "dashboards": ["participant", "organization"], "modeled_estimated_disclaimer": false, "notes": "Geographic facts (org locations), not statistical estimates. inside_downtown_boundary is a property for map styling/tiering, NOT an inclusion filter -- most real capacity sits just outside the strict 6-neighborhood polygon (see Phase 3 finding) and was deliberately kept in. Citywide MSBA rows included only if inside the boundary OR within 3.0 miles of it ('downtown-relevant' cut, documented in-session); this radius is a judgment call, not a given boundary in the source data.", "size_bytes": 119769}, {"file": "org_capacity.json", "type": "tabular (array)", "purpose": "One row per organization x service category with its capacity figure, confidence tier, and source -- researched/published where available, MODELED_FALLBACK elsewhere.", "dashboards": ["organization"], "modeled_estimated_disclaimer": true, "notes": "27 of 70 rows are real published/derived figures (capacity_confidence HIGH/MEDIUM/LOW); 43 are MODELED_FALLBACK. org_wide_total_flag=true rows must be excluded from any per-category sum across an org's rows to avoid double-counting.", "size_bytes": 37605}, {"file": "org_capacity.geojson", "type": "map layer (Point FeatureCollection)", "purpose": "Mappable counterpart to org_capacity.json -- same fields, one feature per org x category row, geometry joined on org_key.", "dashboards": ["organization"], "modeled_estimated_disclaimer": true, "notes": "5 orgs (2-1-1 San Diego, Family Health Centers of San Diego, San Diego Workforce Partnership, San Ysidro Health, The Hub - Homelessness Response Center) have no resolved coordinate (countywide/no-fixed-location) -- their 20 rows are omitted here but remain in org_capacity.json.", "size_bytes": 33594}, {"file": "block_need_heatmap.geojson", "type": "map layer (Polygon FeatureCollection)", "purpose": "Downtown block-level polygons with the latest and full-history individuals/tents/vehicles counts, for a block-level heatmap or time slider.", "dashboards": ["organization"], "modeled_estimated_disclaimer": true, "notes": "288 blocks total; 259 carry Panel261 balanced-panel history (has_panel_data=true), 29 do not (has_panel_data=false, history=[]) -- these 29 carry a Golden Hill/Barrio Logan/Sherman Heights neighborhood label despite falling geometrically inside the boundary. 618 KB -- fine for a client fetch but the largest file here; if the UI adds more years of history this should be checked again.", "size_bytes": 617856}, {"file": "monthly_trend.json", "type": "tabular (array, wrapped with a note field)", "purpose": "Downtown-area monthly point-in-time total counts, 2017-2025, for a trend chart.", "dashboards": ["organization"], "modeled_estimated_disclaimer": true, "notes": "component='total' rows only by default; the wrapping object's 'note' field explains individual/tent/vehicle components exist in the source but must never be summed with total.", "size_bytes": 95936}, {"file": "neighborhood_trend.geojson", "type": "map layer (Polygon FeatureCollection)", "purpose": "Mappable counterpart to monthly_trend.json -- one dissolved polygon per downtown neighborhood with its latest month's total and full monthly history.", "dashboards": ["organization"], "modeled_estimated_disclaimer": true, "notes": "IMPORTANT: downtown_san_diego_6_neighborhoods.geojson contains only ONE unioned polygon, not 6 separate neighborhood features -- these 6 polygons are instead dissolved from Downtown_BlockGrid_downtown_filtered.geojson's block footprints grouped by neighborhood, a documented substitution (real geometry, not fabricated, but not the original source file's own per-neighborhood shapes, which don't exist anywhere in the source data). Each feature's crosswalk_note explains its area-name rollup.", "size_bytes": 60954}, {"file": "cooccurrence_probabilities.json", "type": "tabular (array)", "purpose": "Illustrative demo heuristic mapping a presenting signal to a modeled probability of a co-occurring service need, for the recommendation-engine demo.", "dashboards": ["participant"], "modeled_estimated_disclaimer": true, "notes": "NOT a clinical or diagnostic tool -- must never be shown to a real user as a medical assessment. Several cells are intentionally null where no supporting aggregate statistic exists; see each row's caveat field.", "size_bytes": 7531}, {"file": "transit_accessibility.geojson", "type": "map layer (Point FeatureCollection)", "purpose": "Downtown transit stops with wheelchair-boarding status, for a transit-accessibility map layer.", "dashboards": ["participant"], "modeled_estimated_disclaimer": false, "notes": "Geographic facts (GTFS stop data), not statistical estimates.", "size_bytes": 27011}, {"file": "manifest.json", "type": "tabular (this file)", "purpose": "Index of every file in public/data -- purpose, intended dashboard(s), map-layer vs tabular, and whether the modeled/estimated disclaimer applies.", "dashboards": ["participant", "organization"], "modeled_estimated_disclaimer": false, "notes": "Self-referential index; not itself a data source."}]
+[
+ {
+  "file": "service_locations.geojson",
+  "type": "map layer (Point FeatureCollection)",
+  "purpose": "Every resource org with a resolved point location -- MSBA citywide directory (downtown-relevant subset) merged with the Community Org Directory, deduped to one feature per physical site.",
+  "dashboards": [
+   "participant",
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": false,
+  "notes": "Geographic facts (org locations), not statistical estimates. inside_downtown_boundary is a property for map styling/tiering, NOT an inclusion filter -- most real capacity sits just outside the strict 6-neighborhood polygon (see Phase 3 finding) and was deliberately kept in. Citywide MSBA rows included only if inside the boundary OR within 3.0 miles of it ('downtown-relevant' cut, documented in-session); this radius is a judgment call, not a given boundary in the source data.",
+  "size_bytes": 119769
+ },
+ {
+  "file": "org_capacity.json",
+  "type": "tabular (array)",
+  "purpose": "One row per organization x service category with its capacity figure, confidence tier, and source -- researched/published where available, MODELED_FALLBACK elsewhere.",
+  "dashboards": [
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": true,
+  "notes": "37 rows across 16 organizations. 36 carry researched/published figures (capacity_confidence HIGH or MEDIUM); 1 remains MODELED_FALLBACK. All values are normalized to a per-day unit. org_wide_total_flag=true rows (6) must be excluded from any per-category sum across an org to avoid double-counting.",
+  "size_bytes": 20799
+ },
+ {
+  "file": "org_capacity.geojson",
+  "type": "map layer (Point FeatureCollection)",
+  "purpose": "Mappable counterpart to org_capacity.json -- same fields, one feature per org x category row, geometry joined on org_key.",
+  "dashboards": [
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": true,
+  "notes": "32 of the 37 org_capacity.json rows have a resolved coordinate; the rest belong to countywide/no-fixed-location organizations and are omitted here but remain in org_capacity.json.",
+  "size_bytes": 26962
+ },
+ {
+  "file": "block_need_heatmap.geojson",
+  "type": "map layer (Polygon FeatureCollection)",
+  "purpose": "Downtown block-level polygons with the latest and full-history individuals/tents/vehicles counts, for a block-level heatmap or time slider.",
+  "dashboards": [
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": true,
+  "notes": "288 blocks total; 259 carry Panel261 balanced-panel history (has_panel_data=true), 29 do not (has_panel_data=false, history=[]) -- these 29 carry a Golden Hill/Barrio Logan/Sherman Heights neighborhood label despite falling geometrically inside the boundary. 618 KB -- fine for a client fetch but the largest file here; if the UI adds more years of history this should be checked again.",
+  "size_bytes": 617856
+ },
+ {
+  "file": "monthly_trend.json",
+  "type": "tabular (array, wrapped with a note field)",
+  "purpose": "Downtown-area monthly point-in-time total counts, 2017-2025, for a trend chart.",
+  "dashboards": [
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": true,
+  "notes": "component='total' rows only by default; the wrapping object's 'note' field explains individual/tent/vehicle components exist in the source but must never be summed with total.",
+  "size_bytes": 95936
+ },
+ {
+  "file": "neighborhood_trend.geojson",
+  "type": "map layer (Polygon FeatureCollection)",
+  "purpose": "Mappable counterpart to monthly_trend.json -- one dissolved polygon per downtown neighborhood with its latest month's total and full monthly history.",
+  "dashboards": [
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": true,
+  "notes": "IMPORTANT: downtown_san_diego_6_neighborhoods.geojson contains only ONE unioned polygon, not 6 separate neighborhood features -- these 6 polygons are instead dissolved from Downtown_BlockGrid_downtown_filtered.geojson's block footprints grouped by neighborhood, a documented substitution (real geometry, not fabricated, but not the original source file's own per-neighborhood shapes, which don't exist anywhere in the source data). Each feature's crosswalk_note explains its area-name rollup.",
+  "size_bytes": 60954
+ },
+ {
+  "file": "cooccurrence_probabilities.json",
+  "type": "tabular (array)",
+  "purpose": "Illustrative demo heuristic mapping a presenting signal to a modeled probability of a co-occurring service need, for the recommendation-engine demo.",
+  "dashboards": [
+   "participant"
+  ],
+  "modeled_estimated_disclaimer": true,
+  "notes": "NOT a clinical or diagnostic tool -- must never be shown to a real user as a medical assessment. Several cells are intentionally null where no supporting aggregate statistic exists; see each row's caveat field.",
+  "size_bytes": 7531
+ },
+ {
+  "file": "transit_accessibility.geojson",
+  "type": "map layer (Point FeatureCollection)",
+  "purpose": "Downtown transit stops with wheelchair-boarding status, for a transit-accessibility map layer.",
+  "dashboards": [
+   "participant"
+  ],
+  "modeled_estimated_disclaimer": false,
+  "notes": "Geographic facts (GTFS stop data), not statistical estimates.",
+  "size_bytes": 27011
+ },
+ {
+  "file": "manifest.json",
+  "type": "tabular (this file)",
+  "purpose": "Index of every file in public/data -- purpose, intended dashboard(s), map-layer vs tabular, and whether the modeled/estimated disclaimer applies.",
+  "dashboards": [
+   "participant",
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": false,
+  "notes": "Self-referential index; not itself a data source."
+ },
+ {
+  "file": "get_it_done_encampment_blocks.geojson",
+  "type": "map layer (Polygon FeatureCollection)",
+  "purpose": "Downtown block polygons carrying Get It Done 311 'Encampment' and 'Homeless Outreach' request counts per month (2018-08 to 2025-09) and per year, for a complaint-density layer with a working month slider.",
+  "dashboards": [
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": true,
+  "notes": "Complaint volume, NOT a headcount: one encampment generates many repeat reports and reporting rates move with public attention independently of the population. Never sum with or reuse the symbology of the observed counts in block_need_heatmap.geojson. Counts are keyed to the month the request was FILED (date_requested), not closed. reports_by_month is sparse: a missing month means zero, not missing data. 288 blocks, geometry identical to block_need_heatmap.geojson (joinable on block_id), coordinates at 6dp.",
+  "size_bytes": 407381
+ },
+ {
+  "file": "get_it_done_encampment_trend.json",
+  "type": "tabular (object with years array)",
+  "purpose": "Downtown-wide Get It Done encampment/outreach request totals by month and by year, on a filed-date basis.",
+  "dashboards": [
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": true,
+  "notes": "Complaint volume, not a headcount. Source files are grouped by closure year, so these are re-keyed to filing month; yearly totals therefore differ slightly from the source files' own per-file counts. 6-7% of in-boundary requests fall between block polygons and are excluded. 2025 is a partial year.",
+  "size_bytes": 7423
+ },
+ {
+  "file": "hud_pit_benchmark.json",
+  "type": "tabular (object with named series)",
+  "purpose": "HUD Point-in-Time annual counts for the San Diego CoC and California, 2007-2024, plus veteran-specific series 2011-2024, as a regional benchmark alongside the downtown street-count trend.",
+  "dashboards": [
+   "organization"
+  ],
+  "modeled_estimated_disclaimer": false,
+  "notes": "Real published federal counts, not estimates, BUT regional only: CoC and state level with no sub-geography, so they can never be presented as a downtown figure or summed with monthly_trend.json. One to two orders of magnitude larger than the downtown series, so plot on a secondary axis. 2021 is a COVID methodology gap (San Diego reported 0 unsheltered); break or annotate the line, never interpolate.",
+  "size_bytes": 9581
+ }
+]
