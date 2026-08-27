@@ -5,6 +5,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { EmailOtpType } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
+import type { Database } from "@/lib/supabase/database.types";
+
+const serviceKinds: Database["public"]["Enums"]["service_kind"][] = [
+  "shelter",
+  "food",
+  "healthcare",
+  "employment",
+  "clothing",
+  "other",
+];
 
 function safePath(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
@@ -79,6 +89,34 @@ export function AuthCallbackClient() {
         return;
       }
 
+      const metadata = userData.user.user_metadata as {
+        account_type?: string;
+        organization_name?: string;
+        location?: string;
+        services?: unknown;
+      };
+      if (
+        metadata.account_type === "organization" &&
+        typeof metadata.organization_name === "string" &&
+        typeof metadata.location === "string" &&
+        Array.isArray(metadata.services)
+      ) {
+        const services = metadata.services.filter(
+          (service): service is Database["public"]["Enums"]["service_kind"] =>
+            typeof service === "string" &&
+            serviceKinds.includes(
+              service as Database["public"]["Enums"]["service_kind"],
+            ),
+        );
+        if (services.length > 0) {
+          await supabase.rpc("submit_organization_application", {
+            organization_name: metadata.organization_name,
+            location: metadata.location,
+            services,
+          });
+        }
+      }
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("role, org_id")
@@ -90,7 +128,7 @@ export function AuthCallbackClient() {
       }
 
       if (profile?.role === "organization" && profile.org_id) {
-        router.replace("/organization");
+        router.replace("/organization/insights");
         return;
       }
 

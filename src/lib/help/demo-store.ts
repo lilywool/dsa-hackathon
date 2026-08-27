@@ -8,6 +8,7 @@ import { currentParticipant } from "@/lib/placeholder";
 import type { RequestStatus, ServiceKind } from "@/lib/supabase/database.types";
 
 export const DEMO_REQUESTS_COOKIE = "haven-demo-requests-v2";
+const DEMO_ORG_REQUESTS_COOKIE = "haven-demo-org-requests-v1";
 const LEGACY_DEMO_REQUESTS_COOKIE = "haven-demo-requests";
 
 export type DemoHelpRequest = {
@@ -32,9 +33,15 @@ function cookieOptions() {
   };
 }
 
-export async function readDemoRequests(): Promise<DemoHelpRequest[]> {
+export async function readDemoRequests(
+  audience: "participant" | "organization" = "participant",
+): Promise<DemoHelpRequest[]> {
   const cookieStore = await cookies();
-  const raw = cookieStore.get(DEMO_REQUESTS_COOKIE)?.value;
+  const raw = cookieStore.get(
+    audience === "organization"
+      ? DEMO_ORG_REQUESTS_COOKIE
+      : DEMO_REQUESTS_COOKIE,
+  )?.value;
   if (!raw) {
     return [];
   }
@@ -55,12 +62,31 @@ export async function clearLegacyDemoRequestsCookie() {
   }
 }
 
-async function writeDemoRequests(requests: DemoHelpRequest[]) {
+export async function clearDemoRequestsCookie() {
+  const cookieStore = await cookies();
+  const participantRequests = cookieStore.get(DEMO_REQUESTS_COOKIE)?.value;
+  if (participantRequests) {
+    cookieStore.set(DEMO_ORG_REQUESTS_COOKIE, participantRequests, {
+      ...cookieOptions(),
+    });
+  }
+  cookieStore.delete(DEMO_REQUESTS_COOKIE);
+  cookieStore.delete(LEGACY_DEMO_REQUESTS_COOKIE);
+}
+
+async function writeDemoRequests(
+  requests: DemoHelpRequest[],
+  audience: "participant" | "organization" = "participant",
+) {
   const cookieStore = await cookies();
   if (cookieStore.get(LEGACY_DEMO_REQUESTS_COOKIE)) {
     cookieStore.delete(LEGACY_DEMO_REQUESTS_COOKIE);
   }
-  cookieStore.set(DEMO_REQUESTS_COOKIE, JSON.stringify(requests.slice(0, 50)), {
+  const cookieName =
+    audience === "organization"
+      ? DEMO_ORG_REQUESTS_COOKIE
+      : DEMO_REQUESTS_COOKIE;
+  cookieStore.set(cookieName, JSON.stringify(requests.slice(0, 50)), {
     ...cookieOptions(),
   });
 }
@@ -87,6 +113,7 @@ export async function addDemoHelpRequest(input: {
   };
 
   await writeDemoRequests([request, ...existing]);
+  await writeDemoRequests([request, ...existing], "organization");
   return { ok: true, request };
 }
 
@@ -94,11 +121,12 @@ export async function updateDemoHelpRequestStatus(
   requestId: string,
   status: RequestStatus,
 ) {
-  const existing = await readDemoRequests();
+  const existing = await readDemoRequests("organization");
   const next = existing.map((request) =>
     request.id === requestId ? { ...request, status } : request,
   );
   await writeDemoRequests(next);
+  await writeDemoRequests(next, "organization");
 }
 
 export function isDemoRequestId(id: string) {

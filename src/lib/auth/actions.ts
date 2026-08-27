@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 
 import { DEMO_COOKIE, matchDemoAccount, type DemoRole } from "@/lib/auth/demo";
 import { ORG_VERIFIED_COOKIE, REVIEW_COOKIE } from "@/lib/auth/session";
-import { clearLegacyDemoRequestsCookie } from "@/lib/help/demo-store";
+import {
+  clearDemoRequestsCookie,
+  clearLegacyDemoRequestsCookie,
+} from "@/lib/help/demo-store";
 import { SERVICE_KINDS } from "@/lib/services";
 import { createClient } from "@/lib/supabase/server";
 import type { ServiceKind } from "@/lib/supabase/database.types";
@@ -23,7 +26,7 @@ function signInErrorMessage(message: string) {
   if (lower.includes("confirm")) {
     return "That email or password did not match. Try the first password you set, or reset it.";
   }
-  return "That email or password did not match. If you applied more than once, use the first password you set, or reset it.";
+  return "Must be approved SupaBase dev login account";
 }
 
 async function profileForUser(
@@ -77,10 +80,13 @@ async function completeDemoSignIn(role: DemoRole): Promise<never> {
 
   await setDemoRole(role);
   await clearLegacyDemoRequestsCookie();
-  redirect(role === "organization" ? "/organization" : "/participant");
+  redirect(role === "organization" ? "/organization/insights" : "/participant");
 }
 
 export async function signOut() {
+  const cookieStore = await cookies();
+  const demoRole = cookieStore.get(DEMO_COOKIE)?.value;
+
   try {
     const supabase = await createClient();
     await supabase.auth.signOut();
@@ -88,7 +94,10 @@ export async function signOut() {
     // Auth may be down; still clear local demo session cookies.
   }
 
-  const cookieStore = await cookies();
+  if (demoRole === "participant") {
+    await clearDemoRequestsCookie();
+  }
+
   cookieStore.delete(ORG_VERIFIED_COOKIE);
   cookieStore.delete(DEMO_COOKIE);
   redirect("/");
@@ -98,13 +107,12 @@ export async function signUpParticipant(
   _prev: AuthState,
   formData: FormData,
 ): Promise<AuthState> {
-  const firstName = String(formData.get("firstName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
-  if (!firstName || !email || password.length < 8) {
+  if (!email || password.length < 8) {
     return {
-      error: "Enter your first name, email, and a password of at least 8 characters.",
+      error: "Enter your email and a password of at least 8 characters.",
     };
   }
 
@@ -113,7 +121,7 @@ export async function signUpParticipant(
     email,
     password,
     options: {
-      data: { account_type: "participant", first_name: firstName },
+      data: { account_type: "participant" },
       emailRedirectTo: `${await siteUrl()}/auth/callback?next=/participant`,
     },
   });
@@ -123,7 +131,10 @@ export async function signUpParticipant(
   }
 
   if (!data.session) {
-    redirect("/participant/sign-in?check-email=1");
+    return {
+      error:
+        "Account created, but email confirmation is enabled and no confirmation email is available. Disable Confirm email in Supabase Auth settings, then try again.",
+    };
   }
 
   redirect("/participant");
@@ -140,7 +151,7 @@ export async function signInParticipant(
     return { error: "Enter your email and password." };
   }
 
-  const demoRole = matchDemoAccount(email, password);
+  const demoRole = matchDemoAccount(email, password, "participant");
   if (demoRole) {
     await completeDemoSignIn(demoRole);
   }
@@ -216,13 +227,10 @@ export async function applyAsOrganization(
   }
 
   if (!data.session) {
-    const signIn = await supabase.auth.signInWithPassword({ email, password });
-    if (signIn.error || !signIn.data.session) {
-      return {
-        error:
-          "An account with this email already exists. Use the original password, or reset it from organization sign in.",
-      };
-    }
+    return {
+      error:
+        "Account created, but email confirmation is enabled and no confirmation email is available. Disable Confirm email in Supabase Auth settings, then try again.",
+    };
   }
 
   const { error: submitError } = await supabase.rpc(
@@ -252,7 +260,7 @@ export async function signInOrganization(
     return { error: "Enter your email and password." };
   }
 
-  const demoRole = matchDemoAccount(email, password);
+  const demoRole = matchDemoAccount(email, password, "organization");
   if (demoRole) {
     await completeDemoSignIn(demoRole);
   }
@@ -285,7 +293,7 @@ export async function signInOrganization(
     redirect("/organization/status");
   }
 
-  redirect("/organization");
+  redirect("/organization/insights");
 }
 
 export async function requestPasswordReset(
@@ -338,7 +346,7 @@ export async function updatePassword(
   const profile = await profileForUser(supabase, userData.user.id);
 
   if (profile?.role === "organization" && profile.org_id) {
-    redirect("/organization");
+    redirect("/organization/insights");
   }
 
   if (profile?.role === "pending_organization" || profile?.role === "organization") {

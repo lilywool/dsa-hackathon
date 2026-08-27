@@ -55,7 +55,7 @@ export default async function OrganizationStatusPage() {
           </span>
         </p>
         <Button className="mt-6 h-11 w-full" asChild>
-          <a href="/organization">Open dashboard</a>
+          <a href="/organization/insights">Open dashboard</a>
         </Button>
         <AuthLinks>
           <form action={signOut}>

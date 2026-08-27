@@ -152,7 +152,7 @@ export async function listIncomingRequests(
     created_at: request.created_at,
   }));
 
-  const demo = (await readDemoRequests())
+  const demo = (await readDemoRequests("organization"))
     .filter(
       (request) =>
         request.organization_id === organizationId &&
@@ -237,7 +237,7 @@ export async function countPendingRequests(organizationId: string) {
     .eq("organization_id", organizationId)
     .eq("status", "pending");
 
-  const demoPending = (await readDemoRequests()).filter(
+  const demoPending = (await readDemoRequests("organization")).filter(
     (request) =>
       request.organization_id === organizationId &&
       request.status === "pending",

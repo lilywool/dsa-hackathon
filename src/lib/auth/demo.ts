@@ -9,11 +9,11 @@ export type DemoRole = "participant" | "organization";
 
 const demoAccounts = {
   participant: {
-    email: "participant@haven.dev",
+    email: "lwool@sandiego.edu",
     password: "haven-dev",
   },
   organization: {
-    email: "org@haven.dev",
+    email: "lwool@sandiego.edu",
     password: "haven-dev",
   },
 } as const;
@@ -26,8 +26,17 @@ export { DEMO_PARTICIPANT_ID, DEMO_ORGANIZATION_ID };
 export function matchDemoAccount(
   email: string,
   password: string,
+  preferredRole?: DemoRole,
 ): DemoRole | null {
   const normalized = email.trim().toLowerCase();
+
+  if (
+    preferredRole &&
+    normalized === demoAccounts[preferredRole].email &&
+    password === demoAccounts[preferredRole].password
+  ) {
+    return preferredRole;
+  }
 
   if (
     normalized === demoAccounts.participant.email &&

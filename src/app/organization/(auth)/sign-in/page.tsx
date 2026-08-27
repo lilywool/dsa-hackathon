@@ -17,7 +17,7 @@ export default async function OrganizationSignInPage({
   const profile = await getProfile();
 
   if (profile?.role === "organization" && profile.org_id) {
-    redirect("/organization");
+    redirect("/organization/insights");
   }
 
   if (profile?.role === "pending_organization") {
