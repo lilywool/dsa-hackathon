@@ -3,7 +3,12 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { DEMO_COOKIE, matchDemoAccount, type DemoRole } from "@/lib/auth/demo";
+import {
+  DEMO_COOKIE,
+  DEMO_EMAIL_COOKIE,
+  matchDemoAccount,
+  type DemoRole,
+} from "@/lib/auth/demo";
 import { ORG_VERIFIED_COOKIE, REVIEW_COOKIE } from "@/lib/auth/session";
 import {
   clearDemoRequestsCookie,
@@ -57,10 +62,14 @@ function cookieOptions() {
   };
 }
 
-async function setDemoRole(role: DemoRole | null) {
+async function setDemoRole(role: DemoRole | null, email?: string) {
   const cookieStore = await cookies();
   if (role) {
     cookieStore.set(DEMO_COOKIE, role, {
+      ...cookieOptions(),
+      maxAge: 60 * 60 * 8,
+    });
+    cookieStore.set(DEMO_EMAIL_COOKIE, email ?? "", {
       ...cookieOptions(),
       maxAge: 60 * 60 * 8,
     });
@@ -68,9 +77,10 @@ async function setDemoRole(role: DemoRole | null) {
   }
 
   cookieStore.delete(DEMO_COOKIE);
+  cookieStore.delete(DEMO_EMAIL_COOKIE);
 }
 
-async function completeDemoSignIn(role: DemoRole): Promise<never> {
+async function completeDemoSignIn(role: DemoRole, email: string): Promise<never> {
   try {
     const supabase = await createClient();
     await supabase.auth.signOut();
@@ -78,7 +88,7 @@ async function completeDemoSignIn(role: DemoRole): Promise<never> {
     // Auth may be down; demo login should still open the dashboard.
   }
 
-  await setDemoRole(role);
+  await setDemoRole(role, email);
   await clearLegacyDemoRequestsCookie();
   redirect(role === "organization" ? "/organization/insights" : "/participant");
 }
@@ -100,6 +110,7 @@ export async function signOut() {
 
   cookieStore.delete(ORG_VERIFIED_COOKIE);
   cookieStore.delete(DEMO_COOKIE);
+  cookieStore.delete(DEMO_EMAIL_COOKIE);
   redirect("/");
 }
 
@@ -153,7 +164,7 @@ export async function signInParticipant(
 
   const demoRole = matchDemoAccount(email, password, "participant");
   if (demoRole) {
-    await completeDemoSignIn(demoRole);
+    await completeDemoSignIn(demoRole, email);
   }
 
   const supabase = await createClient();
@@ -262,7 +273,7 @@ export async function signInOrganization(
 
   const demoRole = matchDemoAccount(email, password, "organization");
   if (demoRole) {
-    await completeDemoSignIn(demoRole);
+    await completeDemoSignIn(demoRole, email);
   }
 
   const supabase = await createClient();
@@ -369,7 +380,7 @@ export async function signInToCheckStatus(
 
   const demoRole = matchDemoAccount(email, password);
   if (demoRole) {
-    await completeDemoSignIn(demoRole);
+    await completeDemoSignIn(demoRole, email);
   }
 
   const supabase = await createClient();

@@ -1,7 +1,12 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { DEMO_COOKIE, demoProfile, type DemoRole } from "@/lib/auth/demo";
+import {
+  DEMO_COOKIE,
+  DEMO_EMAIL_COOKIE,
+  demoProfile,
+  type DemoRole,
+} from "@/lib/auth/demo";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/supabase/database.types";
 
@@ -14,10 +19,15 @@ async function getDemoRole(): Promise<DemoRole | null> {
   return value === "participant" || value === "organization" ? value : null;
 }
 
+async function getDemoEmail(): Promise<string | null> {
+  const cookieStore = await cookies();
+  return cookieStore.get(DEMO_EMAIL_COOKIE)?.value ?? null;
+}
+
 export async function getProfile(): Promise<Profile | null> {
   const demoRole = await getDemoRole();
   if (demoRole) {
-    return demoProfile(demoRole);
+    return demoProfile(demoRole, await getDemoEmail() ?? undefined);
   }
 
   try {
