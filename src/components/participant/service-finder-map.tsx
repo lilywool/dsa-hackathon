@@ -7,20 +7,26 @@ import {
   MapContainer,
   Popup,
   TileLayer,
+  Polyline,
   useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 import { DOWNTOWN_CENTER } from "@/lib/data/geo";
-import type { ServiceSite } from "@/components/participant/service-finder";
+import type {
+  SearchLocation,
+  ServiceSite,
+} from "@/components/participant/service-finder";
 
 type Stop = { id: string; name: string; lat: number; lng: number };
+const DEFAULT_MAP_ZOOM = 14;
 
 type Props = {
   sites: ServiceSite[];
   accessibleStops: Stop[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  location: SearchLocation | null;
 };
 
 function FocusSelected({
@@ -38,11 +44,24 @@ function FocusSelected({
   return null;
 }
 
+function FocusLocation({ location }: { location: SearchLocation | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (location) {
+      map.setView([location.lat, location.lng], 15, { animate: true });
+    } else {
+      map.setView(DOWNTOWN_CENTER, DEFAULT_MAP_ZOOM, { animate: true });
+    }
+  }, [location, map]);
+  return null;
+}
+
 export function ServiceFinderMap({
   sites,
   accessibleStops,
   selectedId,
   onSelect,
+  location,
 }: Props) {
   const selected = useMemo(
     () => sites.find((site) => site.id === selectedId),
@@ -54,7 +73,7 @@ export function ServiceFinderMap({
       <div className="overflow-hidden rounded-2xl ring-1 ring-foreground/10">
         <MapContainer
           center={DOWNTOWN_CENTER}
-          zoom={13}
+          zoom={DEFAULT_MAP_ZOOM}
           scrollWheelZoom={false}
           className="h-[320px] w-full z-0"
         >
@@ -63,6 +82,51 @@ export function ServiceFinderMap({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <FocusSelected site={selected} />
+          <FocusLocation location={location} />
+          {location ? (
+            <CircleMarker
+              center={[location.lat, location.lng]}
+              radius={9}
+              pathOptions={{
+                color: "#1f4f4a",
+                fillColor: "#f3c969",
+                fillOpacity: 1,
+                weight: 3,
+              }}
+            >
+              <Popup>
+                <p className="text-sm font-medium">Searched address</p>
+                <p className="text-xs">{location.label}</p>
+              </Popup>
+            </CircleMarker>
+          ) : null}
+          {location && selected ? (
+            <>
+              <Polyline
+                positions={[
+                  [location.lat, location.lng],
+                  [selected.lat, selected.lng],
+                ]}
+                pathOptions={{
+                  color: "#fffaf0",
+                  weight: 9,
+                  opacity: 0.95,
+                }}
+              />
+              <Polyline
+                positions={[
+                  [location.lat, location.lng],
+                  [selected.lat, selected.lng],
+                ]}
+                pathOptions={{
+                  color: "#d97706",
+                  weight: 5,
+                  opacity: 1,
+                  dashArray: "10 8",
+                }}
+              />
+            </>
+          ) : null}
           {accessibleStops.map((stop) => (
             <CircleMarker
               key={stop.id}
@@ -172,6 +236,18 @@ export function ServiceFinderMap({
               stop
             </span>
           </li>
+          {location && selected ? (
+            <li className="flex items-start gap-2.5">
+              <span
+                className="mt-2 h-0.5 w-7 shrink-0 border-t-2 border-dashed border-amber-600"
+                aria-hidden="true"
+              />
+              <span>
+                <span className="text-foreground">Approximate route</span> —
+                from your location to the selected site
+              </span>
+            </li>
+          ) : null}
         </ul>
       </div>
     </div>

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 import { CareAssessCallout } from "@/components/participant/care-assess-callout";
-import { Button } from "@/components/ui/button";
+import { NearbyOrganizations } from "@/components/participant/nearby-organizations";
 import { requireParticipant } from "@/lib/auth/session";
 import {
   listDirectoryOrganizations,
@@ -31,7 +31,7 @@ export default async function ParticipantHomePage() {
   const nearby = (await listDirectoryOrganizations()).map(toHelpOrganization);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 pb-8">
       <div>
         <h1 className="font-heading text-3xl tracking-tight sm:text-4xl">
           What do you need today?
@@ -60,34 +60,7 @@ export default async function ParticipantHomePage() {
           })}
         </div>
       </section>
-      <section className="space-y-4">
-        <div className="flex items-end justify-between gap-3">
-          <h2 className="font-heading text-xl">Close by</h2>
-          <Button variant="link" className="h-auto px-0" asChild>
-            <Link href="/participant/find">See all</Link>
-          </Button>
-        </div>
-        {nearby.length === 0 ? (
-          <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground ring-1 ring-foreground/10">
-            No organizations are listed yet.
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {nearby.slice(0, 3).map((org) => (
-              <li
-                key={org.id}
-                className="rounded-2xl bg-card p-4 ring-1 ring-foreground/10"
-              >
-                <p className="font-medium">{org.name}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {org.neighborhood}
-                </p>
-                <p className="mt-2 text-sm">{org.highlight}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <NearbyOrganizations organizations={nearby} />
 
       <CareAssessCallout />
     </div>
