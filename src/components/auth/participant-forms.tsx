@@ -58,16 +58,6 @@ export function ParticipantSignUpForm() {
     <form action={action} className="space-y-4">
       <AuthError message={state.error} />
       <div className="space-y-2">
-        <Label htmlFor="firstName">First name</Label>
-        <Input
-          id="firstName"
-          name="firstName"
-          autoComplete="given-name"
-          required
-          className={fieldClass}
-        />
-      </div>
-      <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"

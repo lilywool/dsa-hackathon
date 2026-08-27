@@ -105,7 +105,7 @@ async function runEyePop(imagePath: string): Promise<PredictionLike[]> {
 }
 
 export type CareAssessResult = {
-  imageId: CareAssessImageId;
+  imageId: CareAssessImageId | "upload";
   source: "eyepop" | "demo";
   findings: CareFinding[];
   raw: PredictionLike[];
@@ -151,5 +151,25 @@ export async function assessCareImage(
       raw,
       error: message,
     };
+  }
+}
+
+export async function assessCareUpload(
+  imagePath: string,
+): Promise<CareAssessResult> {
+  if (!process.env.EYEPOP_API_KEY) {
+    throw new Error("Live upload assessment requires EYEPOP_API_KEY");
+  }
+
+  try {
+    const raw = await runEyePop(imagePath);
+    const findings = summarizeCarePredictions(raw).filter(
+      (finding) => finding.detected,
+    );
+    return { imageId: "upload", source: "eyepop", findings, raw };
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "EyePop assessment failed",
+    );
   }
 }
