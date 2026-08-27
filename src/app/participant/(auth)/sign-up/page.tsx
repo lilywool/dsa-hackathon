@@ -9,7 +9,7 @@ export default function ParticipantSignUpPage() {
   return (
     <AuthFrame
       title="Create a participant account"
-      description="A regular email and password is enough. You can start looking for help right after."
+      description="Prototype Demo Dev Login"
     >
       <ParticipantSignUpForm />
       <AuthLinks>

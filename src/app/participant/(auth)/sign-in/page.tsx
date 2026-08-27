@@ -11,7 +11,7 @@ export const metadata = {
 export default async function ParticipantSignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ "check-email"?: string; expired?: string }>;
+  searchParams: Promise<{ expired?: string }>;
 }) {
   const params = await searchParams;
   const profile = await getProfile();
@@ -29,11 +29,6 @@ export default async function ParticipantSignInPage({
         <p className="mb-4 rounded-lg bg-card px-3 py-2 text-sm ring-1 ring-foreground/10">
           That email link expired. Sign in here, or reset your password if you
           need a new one.
-        </p>
-      ) : null}
-      {params["check-email"] ? (
-        <p className="mb-4 rounded-lg bg-card px-3 py-2 text-sm ring-1 ring-foreground/10">
-          Check your email to confirm the account, then sign in here.
         </p>
       ) : null}
       <ParticipantSignInForm />
