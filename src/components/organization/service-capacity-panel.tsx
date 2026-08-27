@@ -7,7 +7,6 @@ import {
   CartesianGrid,
   Cell,
   Label,
-  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -68,6 +67,11 @@ const barFillByStatus: Record<AvailabilityStatus, string> = {
   at_capacity: "oklch(0.55 0.14 25)",
   unknown: "oklch(0.72 0.02 80)",
 };
+
+const FOOD_PANTRY_ORG_KEYS = new Set([
+  "feeding-san-diego",
+  "jacobs-cushman-san-diego-food-bank",
+]);
 
 function confidenceLabel(level: CapacityConfidence) {
   return level === "MODELED_FALLBACK" ? "MODELED" : level;
@@ -200,7 +204,15 @@ function ServiceCapacityTable({
   );
 }
 
-function ServiceCapacityChart({ rows }: { rows: CapacityAvailabilityRow[] }) {
+function ServiceCapacityChart({
+  rows,
+  title,
+  organizationFilter,
+}: {
+  rows: CapacityAvailabilityRow[];
+  title?: string;
+  organizationFilter?: (row: CapacityAvailabilityRow) => boolean;
+}) {
   const data = useMemo(
     () =>
       rows
@@ -209,6 +221,7 @@ function ServiceCapacityChart({ rows }: { rows: CapacityAvailabilityRow[] }) {
             row.capacity_confidence === "HIGH" ||
             row.capacity_confidence === "MEDIUM",
         )
+          .filter((row) => organizationFilter?.(row) ?? true)
         .map((row) => ({
           name: shortOrgLabel(row.organization),
           fullName: row.organization,
@@ -218,7 +231,7 @@ function ServiceCapacityChart({ rows }: { rows: CapacityAvailabilityRow[] }) {
           status: row.status,
           unit: row.displayUnit,
         })),
-    [rows],
+    [organizationFilter, rows],
   );
 
   if (data.length === 0) {
@@ -230,88 +243,108 @@ function ServiceCapacityChart({ rows }: { rows: CapacityAvailabilityRow[] }) {
   }
 
   return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          margin={{ top: 8, right: 12, bottom: 48, left: 8 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5dfd3" />
-          <XAxis
-            dataKey="name"
-            tick={{ fontSize: 10 }}
-            interval={0}
-            angle={-28}
-            textAnchor="end"
-            height={60}
-          />
-          <YAxis tick={{ fontSize: 10 }} width={48}>
-            <Label
-              value="Capacity / open / need"
-              angle={-90}
-              position="insideLeft"
-              style={{
+    <div className="w-full">
+      {title ? <p className="mb-2 text-sm font-medium">{title}</p> : null}
+      <div
+        aria-label="Chart legend"
+        className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
+      >
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-5 rounded-sm bg-primary/35 ring-1 ring-primary/40" />
+          Capacity
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-5 rounded-sm bg-primary" />
+          Open now
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-5 rounded-sm bg-[oklch(0.55_0.06_250)]/60" />
+          Simulated need
+        </span>
+      </div>
+      <div className="h-72">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            margin={{ top: 8, right: 12, bottom: 48, left: 8 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5dfd3" />
+            <XAxis
+              dataKey="name"
+              tick={{ fontSize: 10 }}
+              interval={0}
+              angle={-28}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis tick={{ fontSize: 10 }} width={60}>
+              <Label
+                value="Daily count"
+                angle={-90}
+                position="insideLeft"
+                offset={8}
+                style={{
+                  fontSize: 12,
+                  fill: "oklch(0.48 0.03 55)",
+                  textAnchor: "middle",
+                }}
+              />
+            </YAxis>
+            <Tooltip
+              contentStyle={{
+                borderRadius: 12,
+                borderColor: "#e5dfd3",
                 fontSize: 12,
-                fill: "oklch(0.48 0.03 55)",
-                textAnchor: "middle",
+              }}
+              formatter={(value, name, item) => {
+                const numeric =
+                  typeof value === "number" ? value : Number(value ?? 0);
+                const unit =
+                  (item?.payload as { unit?: string } | undefined)?.unit ?? "";
+                const label =
+                  name === "open"
+                    ? "Open now"
+                    : name === "need"
+                      ? "Need"
+                      : "Capacity";
+                return [`${formatCapacityValue(numeric)} ${unit}`, label];
+              }}
+              labelFormatter={(_, payload) => {
+                const first = payload?.[0]?.payload as
+                  | { fullName?: string }
+                  | undefined;
+                return first?.fullName ?? "";
               }}
             />
-          </YAxis>
-          <Tooltip
-            contentStyle={{
-              borderRadius: 12,
-              borderColor: "#e5dfd3",
-              fontSize: 12,
-            }}
-            formatter={(value, name, item) => {
-              const numeric =
-                typeof value === "number" ? value : Number(value ?? 0);
-              const unit =
-                (item?.payload as { unit?: string } | undefined)?.unit ?? "";
-              const label =
-                name === "open"
-                  ? "Open now"
-                  : name === "need"
-                    ? "Need"
-                    : "Capacity";
-              return [`${formatCapacityValue(numeric)} ${unit}`, label];
-            }}
-            labelFormatter={(_, payload) => {
-              const first = payload?.[0]?.payload as
-                | { fullName?: string }
-                | undefined;
-              return first?.fullName ?? "";
-            }}
-          />
-          <Legend wrapperStyle={{ fontSize: 12 }} verticalAlign="top" />
-          <Bar dataKey="capacity" name="Capacity" radius={[4, 4, 0, 0]}>
-            {data.map((entry) => (
-              <Cell
-                key={`cap-${entry.fullName}`}
-                fill={barFillByStatus[entry.status]}
-                fillOpacity={0.35}
-              />
-            ))}
-          </Bar>
-          <Bar dataKey="open" name="Open now" radius={[4, 4, 0, 0]}>
-            {data.map((entry) => (
-              <Cell
-                key={`open-${entry.fullName}`}
-                fill={barFillByStatus[entry.status]}
-              />
-            ))}
-          </Bar>
-          <Bar dataKey="need" name="Need" radius={[4, 4, 0, 0]}>
-            {data.map((entry) => (
-              <Cell
-                key={`need-${entry.fullName}`}
-                fill="oklch(0.55 0.06 250)"
-                fillOpacity={0.55}
-              />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+            <Bar dataKey="capacity" name="Capacity" radius={[4, 4, 0, 0]}>
+              {data.map((entry) => (
+                <Cell
+                  key={`cap-${entry.fullName}`}
+                  fill={barFillByStatus[entry.status]}
+                  fillOpacity={0.35}
+                />
+              ))}
+            </Bar>
+            <Bar dataKey="open" name="Open now" radius={[4, 4, 0, 0]}>
+              {data.map((entry) => (
+                <Cell
+                  key={`open-${entry.fullName}`}
+                  fill={barFillByStatus[entry.status]}
+                />
+              ))}
+            </Bar>
+            <Bar dataKey="need" name="Need" radius={[4, 4, 0, 0]}>
+              {data.map((entry) => (
+                <Cell
+                  key={`need-${entry.fullName}`}
+                  fill="oklch(0.55 0.06 250)"
+                  fillOpacity={0.55}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
@@ -363,6 +396,23 @@ function ReferralCallout({
       </p>
       <p className="mt-1 text-muted-foreground">
         Send participants to:{" "}
+          <div
+            aria-label="Chart legend"
+            className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-5 rounded-sm bg-primary/35 ring-1 ring-primary/40" />
+              Capacity
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-5 rounded-sm bg-primary" />
+              Open now
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-5 rounded-sm bg-[oklch(0.55_0.06_250)]/60" />
+              Simulated need
+            </span>
+          </div>
         {peers
           .slice(0, 4)
           .map(
@@ -440,7 +490,14 @@ export function ServiceCapacityPanel({
   }
 
   const activeRows = byService.get(resolvedActive) ?? [];
+  const foodPantryRows = activeRows.filter((row) =>
+    FOOD_PANTRY_ORG_KEYS.has(row.org_key),
+  );
+  const warmMealRows = activeRows.filter(
+    (row) => !FOOD_PANTRY_ORG_KEYS.has(row.org_key),
+  );
   const summary = vacancySummary(activeRows);
+  const summaryRows = resolvedActive === "food" ? warmMealRows : activeRows;
 
   return (
     <Card>
@@ -450,7 +507,8 @@ export function ServiceCapacityPanel({
         </CardTitle>
         <CardDescription>
           Organizations that explicitly offer each service, with a live-style
-          capacity snapshot (±20 of published averages). Need and vacancies
+          capacity snapshot (±{CAPACITY_JITTER * 100}% of published averages).
+          Need and vacancies
           re-roll when you change the service filter.
         </CardDescription>
       </CardHeader>
@@ -500,7 +558,7 @@ export function ServiceCapacityPanel({
           </TabsList>
 
           <TabsContent value={resolvedActive} className="space-y-4">
-            <UnfilledAlert rows={activeRows} />
+            <UnfilledAlert rows={summaryRows} />
 
             <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
               <span className="rounded-md bg-primary/10 px-2 py-1 text-primary ring-1 ring-primary/20">
@@ -518,27 +576,67 @@ export function ServiceCapacityPanel({
             </div>
 
             <ReferralCallout
-              rows={activeRows}
+              rows={summaryRows}
               currentOrgName={currentOrgName}
             />
 
-            <div className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
+            <div className="space-y-4">
               <div className="rounded-xl bg-card p-3 ring-1 ring-foreground/10">
-                <p className="mb-2 text-sm font-medium">
-                  Capacity vs open slots vs need
-                </p>
-                <ServiceCapacityChart rows={activeRows} />
+                {resolvedActive === "food" ? (
+                  <div className="grid gap-4 xl:grid-cols-2">
+                    <ServiceCapacityChart
+                      rows={foodPantryRows}
+                      title="Food pantry capacity"
+                      organizationFilter={(row) =>
+                        FOOD_PANTRY_ORG_KEYS.has(row.org_key)
+                      }
+                    />
+                    <ServiceCapacityChart
+                      rows={warmMealRows}
+                      title="Warm meals capacity"
+                      organizationFilter={(row) =>
+                        !FOOD_PANTRY_ORG_KEYS.has(row.org_key)
+                      }
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <p className="mb-2 text-sm font-medium">
+                      Capacity vs open slots vs need
+                    </p>
+                    <ServiceCapacityChart rows={activeRows} />
+                  </>
+                )}
               </div>
-              <ServiceCapacityTable
-                rows={activeRows}
-                currentOrgName={currentOrgName}
-              />
+              {resolvedActive === "food" ? (
+                <div className="space-y-4">
+                  <section className="space-y-2">
+                    <h3 className="font-heading text-lg">Food pantries</h3>
+                    <ServiceCapacityTable
+                      rows={foodPantryRows}
+                      currentOrgName={currentOrgName}
+                    />
+                  </section>
+                  <section className="space-y-2">
+                    <h3 className="font-heading text-lg">Warm meals</h3>
+                    <ServiceCapacityTable
+                      rows={warmMealRows}
+                      currentOrgName={currentOrgName}
+                    />
+                  </section>
+                </div>
+              ) : (
+                <ServiceCapacityTable
+                  rows={activeRows}
+                  currentOrgName={currentOrgName}
+                />
+              )}
             </div>
           </TabsContent>
         </Tabs>
 
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Live capacity is synthetic within ±{CAPACITY_JITTER} of each
+          Live capacity is synthetic within ±{CAPACITY_JITTER * 100}% of each
           organization&apos;s published daily average so the table can preview
           real-time reporting.
           LOW / MODELED rows still show simulated vacancies derived from those

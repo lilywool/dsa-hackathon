@@ -6,7 +6,6 @@ import {
   CartesianGrid,
   ComposedChart,
   Label,
-  Legend,
   Line,
   ResponsiveContainer,
   Tooltip,
@@ -515,8 +514,26 @@ export function OrgInsightsPanel({
 
       <Card>
         <CardHeader className="border-b">
-          <CardTitle className="font-heading text-lg">
-            {selectedNeighborhood} series
+          <CardTitle className="flex flex-wrap items-center gap-3 font-heading text-lg">
+            <span>{selectedNeighborhood} series</span>
+            <label className="font-sans text-xs font-medium text-muted-foreground">
+              <span className="sr-only">Select chart neighborhood</span>
+              <select
+                aria-label="Select chart neighborhood"
+                value={selectedNeighborhood}
+                onChange={(event) => setSelectedNeighborhood(event.target.value)}
+                className="h-8 rounded-lg border border-foreground/10 bg-background px-2 text-xs font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+              >
+                {neighborhoods.features.map((feature) => {
+                  const name = feature.properties.neighborhood;
+                  return (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
           </CardTitle>
           <CardDescription>
             Solid line = actual monthly PIT-style totals (2017–2025). Dashed
@@ -563,10 +580,6 @@ export function OrgInsightsPanel({
                     borderColor: "#e5dfd3",
                     fontSize: 12,
                   }}
-                />
-                <Legend
-                  wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
-                  verticalAlign="top"
                 />
                 <Line
                   type="monotone"

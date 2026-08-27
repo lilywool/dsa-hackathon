@@ -1,4 +1,5 @@
 import { capacityEnumToService } from "@/lib/data/org-capacity-match";
+import { dailyDisplayUnit } from "@/lib/data/capacity-availability";
 import { distanceMeters, DOWNTOWN_CENTER } from "@/lib/data/geo";
 import type {
   FeatureCollection,
@@ -50,21 +51,13 @@ export function groupHighCapacitySites(
   );
 }
 
-function displayCapacityValue(value: number, unit: string) {
-  const lower = unit.toLowerCase();
-  if (lower.includes("meal") && (lower.includes("/year") || lower.includes("per year"))) {
-    return Math.max(1, Math.round(value / 365));
-  }
-  if (lower.includes("/month") || lower.includes("per month")) {
-    return Math.max(1, Math.round(value / 30));
-  }
+function displayCapacityValue(value: number) {
   return Math.max(1, Math.round(value));
 }
 
 function radiusFromCapacity(value: number, maxValue: number) {
   const safeMax = Math.max(maxValue, 1);
   const t = Math.min(1, Math.log10(value + 1) / Math.log10(safeMax + 1));
-  // Larger range so capacity differences stay readable at downtown zoom.
   return Math.round(14 + t * 28);
 }
 
@@ -126,9 +119,8 @@ export function buildCapacityMarkers(
       categoryEnum: feature.properties.category_enum,
       capacityValue: displayCapacityValue(
         feature.properties.capacity_value,
-        feature.properties.capacity_unit,
       ),
-      capacityUnit: feature.properties.capacity_unit,
+      capacityUnit: dailyDisplayUnit(feature.properties.capacity_unit),
       confidence: feature.properties.capacity_confidence,
     });
   }

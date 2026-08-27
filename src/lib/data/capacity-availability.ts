@@ -51,8 +51,8 @@ const STATUS_RANK: Record<AvailabilityStatus, number> = {
   unknown: 3,
 };
 
-/** Max absolute jitter applied to published daily/capacity averages. */
-export const CAPACITY_JITTER = 20;
+/** Maximum proportional jitter applied to published daily/capacity averages. */
+export const CAPACITY_JITTER = 0.3;
 
 export const availabilityLabels: Record<AvailabilityStatus, string> = {
   available: "Vacancies available",
@@ -77,11 +77,6 @@ function createRng(seed: string) {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
     return state / 4294967296;
   };
-}
-
-function isAnnualThroughput(unit: string) {
-  const lower = unit.toLowerCase();
-  return lower.includes("/year") || lower.includes("per year");
 }
 
 function hasPublishedInventorySignal(row: OrgCapacityRow) {
@@ -136,39 +131,28 @@ export function resourceUnitNoun(unit: string): string {
   return "slots";
 }
 
+export function dailyDisplayUnit(unit: string) {
+  return unit
+    .replace(/\s*\([^)]*\)/g, "")
+    .replace(/\/year\b/gi, "/day")
+    .replace(/\bper year\b/gi, "per day")
+    .replace(/\/month\b/gi, "/day")
+    .replace(/\bper month\b/gi, "per day")
+    .trim();
+}
+
 function toDisplayCapacity(row: OrgCapacityRow) {
   const unit = row.capacity_unit;
-  const lower = unit.toLowerCase();
-
-  if (lower.includes("meal") && isAnnualThroughput(unit)) {
-    const daily = Math.max(1, Math.round(row.capacity_value / 365));
-    return {
-      displayTotal: daily,
-      displayUnit: "meals/day (est. from annual)",
-    };
-  }
-
-  if (lower.includes("/month") || lower.includes("per month")) {
-    const daily = Math.max(1, Math.round(row.capacity_value / 30));
-    return {
-      displayTotal: daily,
-      displayUnit: `${resourceUnitNoun(unit)}/day (est. from monthly)`,
-    };
-  }
-
-  if (Number.isInteger(row.capacity_value)) {
-    return { displayTotal: row.capacity_value, displayUnit: unit };
-  }
-
   return {
     displayTotal: Math.max(1, Math.round(row.capacity_value)),
-    displayUnit: unit,
+    displayUnit: dailyDisplayUnit(unit),
   };
 }
 
 function jitterCapacity(baseline: number, rand: () => number) {
-  const delta = Math.floor(rand() * (CAPACITY_JITTER * 2 + 1)) - CAPACITY_JITTER;
-  return Math.max(1, baseline + delta);
+  const multiplier =
+    1 - CAPACITY_JITTER + rand() * CAPACITY_JITTER * 2;
+  return Math.max(1, Math.round(baseline * multiplier));
 }
 
 /**
@@ -208,8 +192,11 @@ function syntheticNeed(
   const demandFactor = 0.9 + rand() * 0.45;
   const pressure = Math.max(occupancyRate, 0.85);
   const need = Math.round(liveCapacity * demandFactor * Math.min(pressure + 0.15, 1.25));
-  const floor = Math.max(1, liveCapacity - CAPACITY_JITTER);
-  const ceiling = liveCapacity + Math.max(CAPACITY_JITTER, Math.round(liveCapacity * 0.25));
+  const floor = Math.max(1, Math.round(liveCapacity * (1 - CAPACITY_JITTER)));
+  const ceiling = liveCapacity + Math.max(
+    20,
+    Math.round(liveCapacity * 0.25),
+  );
   return Math.min(ceiling, Math.max(floor, need));
 }
 

@@ -1,1 +1,805 @@
-{"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1219713, 32.7149672]}, "properties": {"org_key": "father-joes-villages", "organization": "Father Joe's Villages", "category": "SHELTER", "category_enum": "shelter", "capacity_value": 2500.0, "capacity_unit": "people housed/night (reported 2,500+)", "capacity_confidence": "HIGH", "capacity_method": "PUBLISHED_BEDS", "metric_interpretation": "ACTUAL CAPACITY", "capacity_source": "https://my.neighbor.org/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1219713, 32.7149672]}, "properties": {"org_key": "father-joes-villages", "organization": "Father Joe's Villages", "category": "FOOD", "category_enum": "food", "capacity_value": 1575.3, "capacity_unit": "meals/year", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://my.neighbor.org/our-solutions/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1219713, 32.7149672]}, "properties": {"org_key": "father-joes-villages", "organization": "Father Joe's Villages", "category": "HEALTH", "category_enum": "healthcare", "capacity_value": 11.0, "capacity_unit": "unique people receiving health-center care/year", "capacity_confidence": "MEDIUM", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://my.neighbor.org/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1219713, 32.7149672]}, "properties": {"org_key": "father-joes-villages", "organization": "Father Joe's Villages", "category": "EMPLOYMENT", "category_enum": "work", "capacity_value": 5.2, "capacity_unit": "people served/year", "capacity_confidence": "MEDIUM", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://my.neighbor.org/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1219713, 32.7149672]}, "properties": {"org_key": "father-joes-villages", "organization": "Father Joe's Villages", "category": "CLOTHES", "category_enum": "clothing", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1219713, 32.7149672]}, "properties": {"org_key": "father-joes-villages", "organization": "Father Joe's Villages", "category": "OTHER", "category_enum": "other", "capacity_value": 2.56, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.160338754612, 32.74548614786]}, "properties": {"org_key": "alpha-project-for-the-homeless", "organization": "Alpha Project for the Homeless", "category": "SHELTER", "category_enum": "shelter", "capacity_value": 510.0, "capacity_unit": "adult emergency shelter beds", "capacity_confidence": "HIGH", "capacity_method": "PUBLISHED_BEDS", "metric_interpretation": "ACTUAL CAPACITY", "capacity_source": "https://alphaproject.org/what-we-do/programs-services/temporary-bridge-shelter.html", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.160338754612, 32.74548614786]}, "properties": {"org_key": "alpha-project-for-the-homeless", "organization": "Alpha Project for the Homeless", "category": "FOOD", "category_enum": "food", "capacity_value": 958.9, "capacity_unit": "hot meals/year", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://alphaproject.org/who-we-are/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.160338754612, 32.74548614786]}, "properties": {"org_key": "alpha-project-for-the-homeless", "organization": "Alpha Project for the Homeless", "category": "EMPLOYMENT", "category_enum": "work", "capacity_value": 6.59, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.160338754612, 32.74548614786]}, "properties": {"org_key": "alpha-project-for-the-homeless", "organization": "Alpha Project for the Homeless", "category": "CLOTHES", "category_enum": "clothing", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.160338754612, 32.74548614786]}, "properties": {"org_key": "alpha-project-for-the-homeless", "organization": "Alpha Project for the Homeless", "category": "OTHER", "category_enum": "other", "capacity_value": 4000.0, "capacity_unit": "people served/day across organization", "capacity_confidence": "MEDIUM", "capacity_method": "PUBLISHED_DAILY", "metric_interpretation": "REPORTED DAILY THROUGHPUT", "capacity_source": "https://alphaproject.org/", "scope": "network_wide_not_site_specific", "org_wide_total_flag": true, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1634628, 32.7242757]}, "properties": {"org_key": "san-diego-rescue-mission", "organization": "San Diego Rescue Mission", "category": "SHELTER", "category_enum": "shelter", "capacity_value": 258.0, "capacity_unit": "nights of shelter/year", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.sdrescue.org/who-we-are/your-impact/2024-impact-report/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1634628, 32.7242757]}, "properties": {"org_key": "san-diego-rescue-mission", "organization": "San Diego Rescue Mission", "category": "FOOD", "category_enum": "food", "capacity_value": 808.7, "capacity_unit": "meals/year", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.sdrescue.org/who-we-are/your-impact/2024-impact-report/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1634628, 32.7242757]}, "properties": {"org_key": "san-diego-rescue-mission", "organization": "San Diego Rescue Mission", "category": "HEALTH", "category_enum": "healthcare", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1634628, 32.7242757]}, "properties": {"org_key": "san-diego-rescue-mission", "organization": "San Diego Rescue Mission", "category": "EMPLOYMENT", "category_enum": "work", "capacity_value": 297.9, "capacity_unit": "job-training hours/year", "capacity_confidence": "MEDIUM", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.sdrescue.org/who-we-are/your-impact/2024-impact-report/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1634628, 32.7242757]}, "properties": {"org_key": "san-diego-rescue-mission", "organization": "San Diego Rescue Mission", "category": "CLOTHES", "category_enum": "clothing", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1634628, 32.7242757]}, "properties": {"org_key": "san-diego-rescue-mission", "organization": "San Diego Rescue Mission", "category": "OTHER", "category_enum": "other", "capacity_value": 2.56, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.162323, 32.7201737]}, "properties": {"org_key": "third-avenue-charitable-organization-taco", "organization": "Third Avenue Charitable Organization (TACO)", "category": "FOOD", "category_enum": "food", "capacity_value": 84.9, "capacity_unit": "meals/year", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.tacosd.org/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": true}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.162323, 32.7201737]}, "properties": {"org_key": "third-avenue-charitable-organization-taco", "organization": "Third Avenue Charitable Organization (TACO)", "category": "HEALTH", "category_enum": "healthcare", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": true}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.162323, 32.7201737]}, "properties": {"org_key": "third-avenue-charitable-organization-taco", "organization": "Third Avenue Charitable Organization (TACO)", "category": "CLOTHES", "category_enum": "clothing", "capacity_value": 4.7, "capacity_unit": "people clothed/year", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.tacosd.org/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": true}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.162323, 32.7201737]}, "properties": {"org_key": "third-avenue-charitable-organization-taco", "organization": "Third Avenue Charitable Organization (TACO)", "category": "OTHER", "category_enum": "other", "capacity_value": 200.0, "capacity_unit": "people/day seeking help (organization-wide)", "capacity_confidence": "MEDIUM", "capacity_method": "PUBLISHED_DAILY", "metric_interpretation": "REPORTED DAILY THROUGHPUT", "capacity_source": "https://www.tacosd.org/who-we-are", "scope": "network_wide_not_site_specific", "org_wide_total_flag": true, "inside_downtown_boundary": true}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.133745503119, 32.717871941799]}, "properties": {"org_key": "youth-assistance-coalition", "organization": "Youth Assistance Coalition", "category": "SHELTER", "category_enum": "shelter", "capacity_value": 9.22, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.133745503119, 32.717871941799]}, "properties": {"org_key": "youth-assistance-coalition", "organization": "Youth Assistance Coalition", "category": "FOOD", "category_enum": "food", "capacity_value": 4.19, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.133745503119, 32.717871941799]}, "properties": {"org_key": "youth-assistance-coalition", "organization": "Youth Assistance Coalition", "category": "HEALTH", "category_enum": "healthcare", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.133745503119, 32.717871941799]}, "properties": {"org_key": "youth-assistance-coalition", "organization": "Youth Assistance Coalition", "category": "EMPLOYMENT", "category_enum": "work", "capacity_value": 6.59, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.133745503119, 32.717871941799]}, "properties": {"org_key": "youth-assistance-coalition", "organization": "Youth Assistance Coalition", "category": "CLOTHES", "category_enum": "clothing", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.133745503119, 32.717871941799]}, "properties": {"org_key": "youth-assistance-coalition", "organization": "Youth Assistance Coalition", "category": "OTHER", "category_enum": "other", "capacity_value": 2.56, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.0918655, 33.12497]}, "properties": {"org_key": "interfaith-community-services", "organization": "Interfaith Community Services", "category": "SHELTER", "category_enum": "shelter", "capacity_value": 9.22, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.0918655, 33.12497]}, "properties": {"org_key": "interfaith-community-services", "organization": "Interfaith Community Services", "category": "FOOD", "category_enum": "food", "capacity_value": 575.6, "capacity_unit": "meals distributed/year", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.interfaithservices.org/sites/default/files/2025-09/2024-annual-report_0.pdf", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.0918655, 33.12497]}, "properties": {"org_key": "interfaith-community-services", "organization": "Interfaith Community Services", "category": "HEALTH", "category_enum": "healthcare", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.0918655, 33.12497]}, "properties": {"org_key": "interfaith-community-services", "organization": "Interfaith Community Services", "category": "EMPLOYMENT", "category_enum": "work", "capacity_value": 6.59, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.0918655, 33.12497]}, "properties": {"org_key": "interfaith-community-services", "organization": "Interfaith Community Services", "category": "OTHER", "category_enum": "other", "capacity_value": 56.2, "capacity_unit": "unique clients/year", "capacity_confidence": "MEDIUM", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.interfaithservices.org/sites/default/files/2025-09/2024-annual-report_0.pdf", "scope": "network_wide_not_site_specific", "org_wide_total_flag": true, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.2011437, 32.8054849]}, "properties": {"org_key": "community-christian-service-agency-ccsa", "organization": "Community Christian Service Agency (CCSA)", "category": "SHELTER", "category_enum": "shelter", "capacity_value": 9.22, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.2011437, 32.8054849]}, "properties": {"org_key": "community-christian-service-agency-ccsa", "organization": "Community Christian Service Agency (CCSA)", "category": "FOOD", "category_enum": "food", "capacity_value": 2000.0, "capacity_unit": "people/month across two centers (food/clothing/basic needs)", "capacity_confidence": "LOW", "capacity_method": "DERIVED_FROM_MONTHLY", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.ccsasandiego.org/about-ccsa", "scope": "network_wide_not_site_specific", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.2011437, 32.8054849]}, "properties": {"org_key": "community-christian-service-agency-ccsa", "organization": "Community Christian Service Agency (CCSA)", "category": "HEALTH", "category_enum": "healthcare", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.2011437, 32.8054849]}, "properties": {"org_key": "community-christian-service-agency-ccsa", "organization": "Community Christian Service Agency (CCSA)", "category": "CLOTHES", "category_enum": "clothing", "capacity_value": 5.76, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.2011437, 32.8054849]}, "properties": {"org_key": "community-christian-service-agency-ccsa", "organization": "Community Christian Service Agency (CCSA)", "category": "OTHER", "category_enum": "other", "capacity_value": 68.5, "capacity_unit": "service contacts/year", "capacity_confidence": "MEDIUM", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.ccsasandiego.org/about-ccsa", "scope": "network_wide_not_site_specific", "org_wide_total_flag": true, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1411289, 32.7113175]}, "properties": {"org_key": "new-day-urban-ministries", "organization": "New Day Urban Ministries", "category": "FOOD", "category_enum": "food", "capacity_value": 3.5, "capacity_unit": "grocery bags/year", "capacity_confidence": "MEDIUM", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://newdayurbanministries.org/about/raul-palomino/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1411289, 32.7113175]}, "properties": {"org_key": "new-day-urban-ministries", "organization": "New Day Urban Ministries", "category": "CLOTHES", "category_enum": "clothing", "capacity_value": 6.6, "capacity_unit": "items of clothing/year", "capacity_confidence": "MEDIUM", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://newdayurbanministries.org/about/raul-palomino/", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1411289, 32.7113175]}, "properties": {"org_key": "new-day-urban-ministries", "organization": "New Day Urban Ministries", "category": "OTHER", "category_enum": "other", "capacity_value": 1785.0, "capacity_unit": "individuals/month", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_MONTHLY", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.fpcsd.org/news/new-day-urban-ministries", "scope": "network_wide_not_site_specific", "org_wide_total_flag": true, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.064035763309, 32.763334246174]}, "properties": {"org_key": "sharias-closet", "organization": "Sharia's Closet", "category": "CLOTHES", "category_enum": "clothing", "capacity_value": 48.3, "capacity_unit": "Bags of Hope / people served in 2024", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.sandiegocounty.gov/content/dam/sdc/hhsa/programs/phs/hiv-planning-group/Sharia%27s%20Closet%20Presentation%20January%202025.pdf", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.064035763309, 32.763334246174]}, "properties": {"org_key": "sharias-closet", "organization": "Sharia's Closet", "category": "OTHER", "category_enum": "other", "capacity_value": 2.56, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1830751, 32.9014275]}, "properties": {"org_key": "feeding-san-diego", "organization": "Feeding San Diego", "category": "FOOD", "category_enum": "food", "capacity_value": 79452.1, "capacity_unit": "meals distributed/year across network", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://feedingsandiego.org/wp-content/uploads/2025/06/AnnualReport_FY24-Update-6.5.pdf", "scope": "network_wide_not_site_specific", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.1830751, 32.9014275]}, "properties": {"org_key": "feeding-san-diego", "organization": "Feeding San Diego", "category": "OTHER", "category_enum": "other", "capacity_value": 2.56, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.163231369977, 32.886178094541]}, "properties": {"org_key": "jacobs-cushman-san-diego-food-bank", "organization": "Jacobs & Cushman San Diego Food Bank", "category": "FOOD", "category_enum": "food", "capacity_value": 118855.2, "capacity_unit": "meals distributed/year", "capacity_confidence": "HIGH", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.sandiegofoodbank.org/wp-content/uploads/2026/02/2025-Annual-Report.pdf", "scope": "network_wide_not_site_specific", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.163231369977, 32.886178094541]}, "properties": {"org_key": "jacobs-cushman-san-diego-food-bank", "organization": "Jacobs & Cushman San Diego Food Bank", "category": "OTHER", "category_enum": "other", "capacity_value": 2.56, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.150323890093, 32.713905110176]}, "properties": {"org_key": "san-diego-hunger-coalition", "organization": "San Diego Hunger Coalition", "category": "FOOD", "category_enum": "food", "capacity_value": 4.19, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": true}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.150323890093, 32.713905110176]}, "properties": {"org_key": "san-diego-hunger-coalition", "organization": "San Diego Hunger Coalition", "category": "OTHER", "category_enum": "other", "capacity_value": 2.56, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": true}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.164014670554, 32.732760702591]}, "properties": {"org_key": "san-diego-american-indian-health-center", "organization": "San Diego American Indian Health Center", "category": "HEALTH", "category_enum": "healthcare", "capacity_value": 11.0, "capacity_unit": "unique patients (historical report)", "capacity_confidence": "LOW", "capacity_method": "DERIVED_FROM_ANNUAL", "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY", "capacity_source": "https://www.sdaihc.org/wp-content/uploads/2022/01/SD-American-Indian-Health-Center-Case-Statement.pdf", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-117.164014670554, 32.732760702591]}, "properties": {"org_key": "san-diego-american-indian-health-center", "organization": "San Diego American Indian Health Center", "category": "OTHER", "category_enum": "other", "capacity_value": 2.56, "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)", "capacity_confidence": "MODELED_FALLBACK", "capacity_method": "MODELED_FALLBACK", "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure", "capacity_source": "modeled, no published data found", "scope": "single_site", "org_wide_total_flag": false, "inside_downtown_boundary": false}}]}
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1219713,
+          32.7149672
+        ]
+      },
+      "properties": {
+        "org_key": "father-joes-villages",
+        "organization": "Father Joe's Villages",
+        "category": "SHELTER",
+        "category_enum": "shelter",
+        "capacity_value": 2500,
+        "capacity_unit": "people housed/night (2,500+, current organizational claim)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ACTUAL CAPACITY",
+        "capacity_source": "https://my.neighbor.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1219713,
+          32.7149672
+        ]
+      },
+      "properties": {
+        "org_key": "father-joes-villages",
+        "organization": "Father Joe's Villages",
+        "category": "FOOD",
+        "category_enum": "food",
+        "capacity_value": 4.32,
+        "capacity_unit": "meals/day (approx. 1,575/year \u00f7 365)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://my.neighbor.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1219713,
+          32.7149672
+        ]
+      },
+      "properties": {
+        "org_key": "father-joes-villages",
+        "organization": "Father Joe's Villages",
+        "category": "HEALTH",
+        "category_enum": "healthcare",
+        "capacity_value": 11,
+        "capacity_unit": "people/day receiving health-center care (derived from approx. 4,000 served in 2025)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://my.neighbor.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1219713,
+          32.7149672
+        ]
+      },
+      "properties": {
+        "org_key": "father-joes-villages",
+        "organization": "Father Joe's Villages",
+        "category": "EMPLOYMENT",
+        "category_enum": "work",
+        "capacity_value": 5.2,
+        "capacity_unit": "people/day in Employment & Education Services (derived from approx. 1,900 served in 2025)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://my.neighbor.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1219713,
+          32.7149672
+        ]
+      },
+      "properties": {
+        "org_key": "father-joes-villages",
+        "organization": "Father Joe's Villages",
+        "category": "OTHER",
+        "category_enum": "other",
+        "capacity_value": 59.9,
+        "capacity_unit": "showers/day (Day Center, approx. 21,874/year \u00f7 365)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_REPORT",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://my.neighbor.org/wp-content/uploads/2023/04/2022-FJV-Blue-Book.pdf",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.160338754612,
+          32.74548614786
+        ]
+      },
+      "properties": {
+        "org_key": "alpha-project-for-the-homeless",
+        "organization": "Alpha Project for the Homeless",
+        "category": "SHELTER",
+        "category_enum": "shelter",
+        "capacity_value": 510,
+        "capacity_unit": "adult emergency shelter beds (510) plus 42 family shelter units",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ACTUAL CAPACITY",
+        "capacity_source": "https://alphaproject.org/who-we-are/mission.html",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.160338754612,
+          32.74548614786
+        ]
+      },
+      "properties": {
+        "org_key": "alpha-project-for-the-homeless",
+        "organization": "Alpha Project for the Homeless",
+        "category": "EMPLOYMENT",
+        "category_enum": "work",
+        "capacity_value": 20,
+        "capacity_unit": "workers/day (current daily work crew size, Wheels of Change)",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ACTUAL CAPACITY",
+        "capacity_source": "https://alphaproject.org/what-we-do/programs-services/wheels-of-change.html",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.160338754612,
+          32.74548614786
+        ]
+      },
+      "properties": {
+        "org_key": "alpha-project-for-the-homeless",
+        "organization": "Alpha Project for the Homeless",
+        "category": "OTHER",
+        "category_enum": "other",
+        "capacity_value": 4000,
+        "capacity_unit": "people served/day across organization",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ACTUAL CAPACITY",
+        "capacity_source": "https://alphaproject.org/",
+        "scope": "network_wide_not_site_specific",
+        "org_wide_total_flag": true,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1634628,
+          32.7242757
+        ]
+      },
+      "properties": {
+        "org_key": "san-diego-rescue-mission",
+        "organization": "San Diego Rescue Mission",
+        "category": "FOOD",
+        "category_enum": "food",
+        "capacity_value": 2.22,
+        "capacity_unit": "meals/day (approx. 808.7/year \u00f7 365)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.sdrescue.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1634628,
+          32.7242757
+        ]
+      },
+      "properties": {
+        "org_key": "san-diego-rescue-mission",
+        "organization": "San Diego Rescue Mission",
+        "category": "HEALTH",
+        "category_enum": "healthcare",
+        "capacity_value": 3.57,
+        "capacity_unit": "guests/day receiving dental & medical care (South County Lighthouse only)",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_REPORT",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.sdrescue.org/what-we-do/2025-impact-report/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1634628,
+          32.7242757
+        ]
+      },
+      "properties": {
+        "org_key": "san-diego-rescue-mission",
+        "organization": "San Diego Rescue Mission",
+        "category": "EMPLOYMENT",
+        "category_enum": "work",
+        "capacity_value": 0.82,
+        "capacity_unit": "job-training hours/day",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.sdrescue.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1634628,
+          32.7242757
+        ]
+      },
+      "properties": {
+        "org_key": "san-diego-rescue-mission",
+        "organization": "San Diego Rescue Mission",
+        "category": "OTHER",
+        "category_enum": "other",
+        "capacity_value": 10.86,
+        "capacity_unit": "showers/day (2024)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_REPORT",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.sdrescue.org/who-we-are/your-impact/2024-impact-report/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.162323,
+          32.7201737
+        ]
+      },
+      "properties": {
+        "org_key": "third-avenue-charitable-organization-taco",
+        "organization": "Third Avenue Charitable Organization (TACO)",
+        "category": "FOOD",
+        "category_enum": "food",
+        "capacity_value": 250,
+        "capacity_unit": "meals/day",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ACTUAL CAPACITY",
+        "capacity_source": "https://sandiegogives.mightycause.com/organization/Tacosd",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.162323,
+          32.7201737
+        ]
+      },
+      "properties": {
+        "org_key": "third-avenue-charitable-organization-taco",
+        "organization": "Third Avenue Charitable Organization (TACO)",
+        "category": "CLOTHES",
+        "category_enum": "clothing",
+        "capacity_value": 0.013,
+        "capacity_unit": "people clothed/day",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.tacosd.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.162323,
+          32.7201737
+        ]
+      },
+      "properties": {
+        "org_key": "third-avenue-charitable-organization-taco",
+        "organization": "Third Avenue Charitable Organization (TACO)",
+        "category": "OTHER",
+        "category_enum": "other",
+        "capacity_value": 200,
+        "capacity_unit": "people/day seeking help (organization-wide)",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ACTUAL CAPACITY",
+        "capacity_source": "https://www.tacosd.org/",
+        "scope": "network_wide_not_site_specific",
+        "org_wide_total_flag": true,
+        "inside_downtown_boundary": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.133745503119,
+          32.717871941799
+        ]
+      },
+      "properties": {
+        "org_key": "youth-assistance-coalition",
+        "organization": "Youth Assistance Coalition",
+        "category": "FOOD",
+        "category_enum": "food",
+        "capacity_value": 52.2,
+        "capacity_unit": "snacks and meals distributed/day",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "TAX_FILING_REPORTED",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.causeiq.com/organizations/youth-assistance-coalition,272451575/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.133745503119,
+          32.717871941799
+        ]
+      },
+      "properties": {
+        "org_key": "youth-assistance-coalition",
+        "organization": "Youth Assistance Coalition",
+        "category": "OTHER",
+        "category_enum": "other",
+        "capacity_value": 1.67,
+        "capacity_unit": "youth served/day (organization-wide total, not category-specific); also 91 placed into permanent housing/year and 59 enrolled in onsite diploma/education track per cycle (program outcomes)",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "TAX_FILING_REPORTED",
+        "metric_interpretation": "ORG-WIDE ANNUAL TOTAL",
+        "capacity_source": "https://www.causeiq.com/organizations/youth-assistance-coalition,272451575/",
+        "scope": "single_site",
+        "org_wide_total_flag": true,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.0918655,
+          33.12497
+        ]
+      },
+      "properties": {
+        "org_key": "interfaith-community-services",
+        "organization": "Interfaith Community Services",
+        "category": "SHELTER",
+        "category_enum": "shelter",
+        "capacity_value": 75,
+        "capacity_unit": "emergency shelter beds (Oceanside Navigation Center, 24/7, 90-day max stay)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ACTUAL CAPACITY",
+        "capacity_source": "https://www.interfaithservices.org/services/housing-shelter/emergency-shelter",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.0918655,
+          33.12497
+        ]
+      },
+      "properties": {
+        "org_key": "interfaith-community-services",
+        "organization": "Interfaith Community Services",
+        "category": "FOOD",
+        "category_enum": "food",
+        "capacity_value": 1.58,
+        "capacity_unit": "meals/day (approx. 575.6/year \u00f7 365)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.interfaithservices.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.0918655,
+          33.12497
+        ]
+      },
+      "properties": {
+        "org_key": "interfaith-community-services",
+        "organization": "Interfaith Community Services",
+        "category": "HEALTH",
+        "category_enum": "healthcare",
+        "capacity_value": 66,
+        "capacity_unit": "treatment beds (32 withdrawal management + 34 residential treatment)",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ACTUAL CAPACITY",
+        "capacity_source": "https://www.interfaithservices.org/services/treatment",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.0918655,
+          33.12497
+        ]
+      },
+      "properties": {
+        "org_key": "interfaith-community-services",
+        "organization": "Interfaith Community Services",
+        "category": "OTHER",
+        "category_enum": "other",
+        "capacity_value": 46.6,
+        "capacity_unit": "unique people/day (org-wide reach across health, wellness & self-sufficiency programs)",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_REPORT",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://alliancehf.org/news/interfaith-community-services-inc/",
+        "scope": "network_wide_not_site_specific",
+        "org_wide_total_flag": true,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.2011437,
+          32.8054849
+        ]
+      },
+      "properties": {
+        "org_key": "community-christian-service-agency-ccsa",
+        "organization": "Community Christian Service Agency (CCSA)",
+        "category": "FOOD",
+        "category_enum": "food",
+        "capacity_value": 115,
+        "capacity_unit": "grocery bags distributed/day (approx. 42,000/year \u00f7 365)",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.ccsasandiego.org/",
+        "scope": "network_wide_not_site_specific",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.2011437,
+          32.8054849
+        ]
+      },
+      "properties": {
+        "org_key": "community-christian-service-agency-ccsa",
+        "organization": "Community Christian Service Agency (CCSA)",
+        "category": "HEALTH",
+        "category_enum": "healthcare",
+        "capacity_value": 1.54,
+        "capacity_unit": "nurse consultations/day (approx. 561/year \u00f7 365)",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.ccsasandiego.org/about-ccsa/resource-counseling/joyce-snyder-center",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.2011437,
+          32.8054849
+        ]
+      },
+      "properties": {
+        "org_key": "community-christian-service-agency-ccsa",
+        "organization": "Community Christian Service Agency (CCSA)",
+        "category": "OTHER",
+        "category_enum": "other",
+        "capacity_value": 0.19,
+        "capacity_unit": "service contacts/day",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.ccsasandiego.org/",
+        "scope": "network_wide_not_site_specific",
+        "org_wide_total_flag": true,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1411289,
+          32.7113175
+        ]
+      },
+      "properties": {
+        "org_key": "new-day-urban-ministries",
+        "organization": "New Day Urban Ministries",
+        "category": "FOOD",
+        "category_enum": "food",
+        "capacity_value": 0.01,
+        "capacity_unit": "grocery bags/day",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://newdayurbanministries.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1411289,
+          32.7113175
+        ]
+      },
+      "properties": {
+        "org_key": "new-day-urban-ministries",
+        "organization": "New Day Urban Ministries",
+        "category": "CLOTHES",
+        "category_enum": "clothing",
+        "capacity_value": 0.018,
+        "capacity_unit": "items of clothing/day",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://newdayurbanministries.org/",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1411289,
+          32.7113175
+        ]
+      },
+      "properties": {
+        "org_key": "new-day-urban-ministries",
+        "organization": "New Day Urban Ministries",
+        "category": "OTHER",
+        "category_enum": "other",
+        "capacity_value": 58.7,
+        "capacity_unit": "individuals/day",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://newdayurbanministries.org/",
+        "scope": "network_wide_not_site_specific",
+        "org_wide_total_flag": true,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.064035763309,
+          32.763334246174
+        ]
+      },
+      "properties": {
+        "org_key": "sharias-closet",
+        "organization": "Sharia's Closet",
+        "category": "CLOTHES",
+        "category_enum": "clothing",
+        "capacity_value": 65,
+        "capacity_unit": "clothing requests/day (reported range 60-70/day)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ACTUAL CAPACITY",
+        "capacity_source": "https://www.cbs8.com/article/news/local/sharias-closet-the-place-san-diegans-in-need-of-clothing-can-go-no-questions-asked/509-4127319d-d94f-4ee9-96b3-21ca6b0f9a0c",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1830751,
+          32.9014275
+        ]
+      },
+      "properties": {
+        "org_key": "feeding-san-diego",
+        "organization": "Feeding San Diego",
+        "category": "FOOD",
+        "category_enum": "food",
+        "capacity_value": 98630,
+        "capacity_unit": "meals/day (approx. 36,000,000/year \u00f7 365)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://feedingsandiego.org/about-us/our-impact/",
+        "scope": "network_wide_not_site_specific",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.163231369977,
+          32.886178094541
+        ]
+      },
+      "properties": {
+        "org_key": "jacobs-cushman-san-diego-food-bank",
+        "organization": "Jacobs & Cushman San Diego Food Bank",
+        "category": "FOOD",
+        "category_enum": "food",
+        "capacity_value": 115068,
+        "capacity_unit": "meals/day (approx. 42,000,000/year \u00f7 365; also 50,000,000+ lbs food/year)",
+        "capacity_confidence": "HIGH",
+        "capacity_method": "PUBLISHED_SITE",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.sandiegofoodbank.org/about/",
+        "scope": "network_wide_not_site_specific",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.164014670554,
+          32.732760702591
+        ]
+      },
+      "properties": {
+        "org_key": "san-diego-american-indian-health-center",
+        "organization": "San Diego American Indian Health Center",
+        "category": "HEALTH",
+        "category_enum": "healthcare",
+        "capacity_value": 137,
+        "capacity_unit": "patients/day (approx. 50,000/year \u00f7 365)",
+        "capacity_confidence": "MEDIUM",
+        "capacity_method": "PUBLISHED_REPORT",
+        "metric_interpretation": "ANNUALIZED/MONTHLY THROUGHPUT PROXY",
+        "capacity_source": "https://www.sdaihc.org/wp-content/uploads/2022/01/SD-American-Indian-Health-Center-Case-Statement.pdf",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.164014670554,
+          32.732760702591
+        ]
+      },
+      "properties": {
+        "org_key": "san-diego-american-indian-health-center",
+        "organization": "San Diego American Indian Health Center",
+        "category": "OTHER",
+        "category_enum": "other",
+        "capacity_value": 2.56,
+        "capacity_unit": "MODELED people/day (demand-proxy fallback, not a published figure)",
+        "capacity_confidence": "MODELED_FALLBACK",
+        "capacity_method": "MODELED_FALLBACK",
+        "metric_interpretation": "MODELED DEMAND-PROXY FALLBACK -- NOT capacity, NOT vacancy, NOT a published figure",
+        "capacity_source": "modeled, no published data found",
+        "scope": "single_site",
+        "org_wide_total_flag": false,
+        "inside_downtown_boundary": false
+      }
+    }
+  ]
+}
