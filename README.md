@@ -30,8 +30,8 @@ hackathon by:
   exploratory data analysis ("StreetSignal SD"); sourced the Get It Done,
   MTS transit, and homeless services datasets
 - [**Mariya Alsaiari**](https://www.linkedin.com/in/mariya-alsaiari/):
-  trained the EyePop computer-vision models for jaundice classification and
-  wound triage
+  conceptualized, trained, and built the EyePop computer-vision models for jaundice classification and
+  wound triage that were later integrated live into Haven's UI.
 - [**LaShea Conner-Gaten, Ed.M.**](https://www.linkedin.com/in/lashea-conner-gaten-edm/):
   project management, stakeholder outreach, pitch deck, and the initial
   web-scraped org capacity research
@@ -41,13 +41,13 @@ hackathon by:
   dashboard; UI work in both the upstream repo and this fork; capacity
   research
 
-## Scope: 
+## Scope:
 
 **Live today:** the analytics and targeting layer, meaning the block-level
 need heatmap, neighborhood trends, and the org capacity dashboard, all built
 on real aggregate historical data.
 
-**Vision, not yet built:** per-person intake/triage records and live
+**Vision Roadmap:** per-person intake/triage records and live
 cross-org capacity coordination. The EyePop upload demonstrates the
 triage-assist *interaction*, but there's no case-record or org
 self-reporting system behind it. Design intent for real deployment is that
@@ -85,6 +85,15 @@ EYEPOP_API_KEY=                 # optional; without it, demo/fallback mode
 ```
 ucsd-edu-malsaiari.image-classify.Jaundice-Classification---Face-and-Body---Aug-2026:latest
 ucsd-edu-malsaiari.image-classify.wound-triage-classification:latest
+```
+
+[EyePop](https://www.eyepop.ai) founder Andy Ballester kindly reinstated
+trial access so I could record a live demo of Haven's care-assessment
+flow. Just in order to record the Demo for Haven, I recreated Mariya's original working eyepop abilities under my own account:
+
+```
+jaundice classification (Face and Body, Aug 2026): 06a92704813778ac80001c5f8f8e715e
+wound triage classification:                       06a926a7eb28747080002b19e5ca3106
 ```
 
 ## Tech stack
@@ -154,8 +163,9 @@ launch, not something to silently inherit.
 
 ## Known limitations
 
-- **No production EyePop key.** The two models above are scoped to Mariya's
-  account; long-term use needs a real key with access to them, or
+- **No production EyePop key.** The live demo ran on trial access Andy
+  Ballester reinstated for my recreated copies of Mariya's two trained
+  abilities; long-term use needs a real key with access to them, or
   republishing under a project-owned account.
 - **Identity-free tracking is a goal, not a built guarantee.** No
   data-retention or de-identification review has been done yet (for example,

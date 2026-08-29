@@ -29,8 +29,7 @@ export default function HomePage() {
           {appName} is how people find help, and how organizations offer it.
         </h1>
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty">
-          {appTagline} Organizations apply first. Participants can create an
-          account with email and password.
+          {appTagline}
         </p>
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           <RoleCard
@@ -38,7 +37,7 @@ export default function HomePage() {
             icon={Building2}
             eyebrow="For organizations"
             title="Relieve homelessness from your programs"
-            body="Apply with your name, location, and services. After approval, sign in with the same email and password."
+            body="Apply with your name, location, and services."
             action="Organization sign in"
           />
           <RoleCard
@@ -46,7 +45,7 @@ export default function HomePage() {
             icon={HandHelping}
             eyebrow="For participants"
             title="Find a bed, a meal, or a next step"
-            body="Create an account with a regular email and password, then look for nearby help in plain language."
+            body="Search for resources, tailored to what you need, closest to you"
             action="Participant sign in"
           />
         </div>

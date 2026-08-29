@@ -119,6 +119,9 @@ export function OrgInsightsPanel({
   const [showCapacity, setShowCapacity] = useState(true);
   const [showTransit, setShowTransit] = useState(true);
   const [showHudBenchmark, setShowHudBenchmark] = useState(false);
+  const [trendSeries, setTrendSeries] = useState<
+    "pit" | "reports" | "both"
+  >("pit");
   // California is ~18x San Diego's count, so sharing one axis flattens San
   // Diego to the baseline. Kept as a separate opt-in rather than on by default.
   const [showHudCalifornia, setShowHudCalifornia] = useState(false);
@@ -287,6 +290,25 @@ export function OrgInsightsPanel({
 
   const activeDate = timeline[monthIndex] ?? null;
 
+  const neighborhoodReportsByMonth = useMemo(() => {
+    const totals = new Map<string, number>();
+    for (const feature of encampmentBlocks?.features ?? []) {
+      if (
+        neighborhoodForecastKey(feature.properties.neighborhood) !==
+        selectedNeighborhood
+      ) {
+        continue;
+      }
+      for (const [month, count] of Object.entries(
+        feature.properties.reports_by_month,
+      )) {
+        const date = `${month}-01`;
+        totals.set(date, (totals.get(date) ?? 0) + count);
+      }
+    }
+    return totals;
+  }, [encampmentBlocks, selectedNeighborhood]);
+
   const neighborhoodPitAt = useMemo(() => {
     const values = new Map<string, number>();
     for (const [name, series] of forecastsByNeighborhood) {
@@ -396,10 +418,18 @@ export function OrgInsightsPanel({
         forecast: point.kind === "forecast" ? point.value : null,
         lower: point.kind === "forecast" ? point.lower : null,
         upper: point.kind === "forecast" ? point.upper : null,
+        reports:
+          neighborhoodReportsByMonth.get(point.date) ??
+          (point.date >= "2018-08-01" ? 0 : null),
         ...hud,
       };
     });
-  }, [forecastsByNeighborhood, selectedNeighborhood, hudBenchmark]);
+  }, [
+    forecastsByNeighborhood,
+    selectedNeighborhood,
+    hudBenchmark,
+    neighborhoodReportsByMonth,
+  ]);
 
   // Right axis is sized to the series actually on screen. With California
   // hidden the axis tops out near San Diego's ~10.6k instead of California's
@@ -451,6 +481,10 @@ export function OrgInsightsPanel({
   // YYYY-MM for the encampment layer, so the map tracks the slider month by
   // month instead of only stepping when the year rolls over.
   const activeMonth = activeDate ? activeDate.slice(0, 7) : null;
+  const activeEncampmentReports = activeMonth
+    ? (neighborhoodReportsByMonth.get(`${activeMonth}-01`) ??
+      (activeMonth >= "2018-08" ? 0 : null))
+    : null;
 
   return (
     <div className="space-y-6">
@@ -461,11 +495,11 @@ export function OrgInsightsPanel({
           </CardTitle>
           <CardDescription>
             Heatmap shows simulated point-in-time homeless population per block
-            — neighborhood PIT totals allocated using Get It Done block count
-            history. Provider markers are sized by capacity for the selected
-            service. Thin red lines approximate transit corridors and last-mile
-            links. {noPanelCount} blocks outside the panel grid are dashed when
-            shown.
+            — neighborhood PIT totals allocated using Get It Done and 311
+            encampment reports. Provider markers are sized by capacity for the
+            selected service. Thin red lines approximate transit corridors and
+            last-mile links. {noPanelCount} blocks outside the panel grid are
+            dashed when shown.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
@@ -521,6 +555,11 @@ export function OrgInsightsPanel({
                 ))}
               </div>
             </div>
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">
+                Block outlines
+              </p>
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               {(neighborhoods.features.map((feature) => feature.properties.neighborhood)).map(
                 (name) => (
@@ -552,6 +591,7 @@ export function OrgInsightsPanel({
             pitByBlock={pitByBlock}
             maxPitValue={maxPitValue}
             selectedNeighborhood={selectedNeighborhood}
+            outlineMode="selected"
             excludeNoPanel={excludeNoPanel}
             capacitySites={capacitySites}
             showCapacity={showCapacity}
@@ -699,6 +739,40 @@ export function OrgInsightsPanel({
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
+          <div className="mb-3 space-y-1.5">
+            <p className="text-xs font-medium text-muted-foreground">
+              Trend series
+            </p>
+            <div className="inline-flex rounded-lg ring-1 ring-foreground/10">
+              {[
+                ["pit", "PIT population"],
+                ["reports", "311 reports"],
+                ["both", "Both"],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() =>
+                    setTrendSeries(value as "pit" | "reports" | "both")
+                  }
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-medium transition-colors first:rounded-l-lg last:rounded-r-lg",
+                    trendSeries === value
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-background text-foreground hover:bg-muted",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {trendSeries !== "pit" ? (
+              <p className="text-[10px] text-muted-foreground">
+                311 encampment reports are complaint volume, not a count of
+                people.
+              </p>
+            ) : null}
+          </div>
           <label className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
             <input
               type="checkbox"
@@ -713,7 +787,7 @@ export function OrgInsightsPanel({
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span className="inline-flex items-center gap-1.5">
                   <span
-                    className="w-4 border-t-2 border-[oklch(0.52_0.14_255)]"
+                    className="w-4 border-t-2 border-[oklch(0.58_0.19_25)]"
                     aria-hidden="true"
                   />
                   San Diego CoC (regional benchmark)
@@ -768,7 +842,7 @@ export function OrgInsightsPanel({
                 </XAxis>
                 <YAxis tick={{ fontSize: 10 }} width={48}>
                   <Label
-                    value="People counted (total)"
+                    value="Monthly count"
                     angle={-90}
                     position="insideLeft"
                     style={{
@@ -781,6 +855,7 @@ export function OrgInsightsPanel({
                 <YAxis
                   yAxisId="right"
                   orientation="right"
+                  hide={!showHudBenchmark}
                   domain={[0, hudAxisMax]}
                   allowDecimals={false}
                   tickFormatter={(value: number) =>
@@ -807,52 +882,67 @@ export function OrgInsightsPanel({
                     fontSize: 12,
                   }}
                 />
-                <Line
-                  type="monotone"
-                  dataKey="upper"
-                  stroke="oklch(0.55 0.1 55 / 0.45)"
-                  strokeWidth={1}
-                  strokeDasharray="2 3"
-                  dot={false}
-                  name="Upper band (forecast)"
-                  connectNulls
-                />
-                <Line
-                  type="monotone"
-                  dataKey="lower"
-                  stroke="oklch(0.55 0.1 55 / 0.45)"
-                  strokeWidth={1}
-                  strokeDasharray="2 3"
-                  dot={false}
-                  name="Lower band (forecast)"
-                  connectNulls
-                />
-                <Line
-                  type="monotone"
-                  dataKey="observed"
-                  stroke="oklch(0.4 0.075 175)"
-                  strokeWidth={2}
-                  dot={false}
-                  name="Observed (actual)"
-                  connectNulls={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="forecast"
-                  stroke="oklch(0.55 0.1 55)"
-                  strokeWidth={2}
-                  strokeDasharray="5 4"
-                  dot={false}
-                  name="Forecast (predicted)"
-                  connectNulls
-                />
+                {trendSeries !== "reports" ? (
+                  <>
+                    <Line
+                      type="monotone"
+                      dataKey="upper"
+                      stroke="oklch(0.55 0.1 55 / 0.45)"
+                      strokeWidth={1}
+                      strokeDasharray="2 3"
+                      dot={false}
+                      name="Upper band (forecast)"
+                      connectNulls
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="lower"
+                      stroke="oklch(0.55 0.1 55 / 0.45)"
+                      strokeWidth={1}
+                      strokeDasharray="2 3"
+                      dot={false}
+                      name="Lower band (forecast)"
+                      connectNulls
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="observed"
+                      stroke="oklch(0.4 0.075 175)"
+                      strokeWidth={2}
+                      dot={false}
+                      name="Observed (actual)"
+                      connectNulls={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="forecast"
+                      stroke="oklch(0.55 0.1 55)"
+                      strokeWidth={2}
+                      strokeDasharray="5 4"
+                      dot={false}
+                      name="Forecast (predicted)"
+                      connectNulls
+                    />
+                  </>
+                ) : null}
+                {trendSeries !== "pit" ? (
+                  <Line
+                    type="monotone"
+                    dataKey="reports"
+                    stroke="oklch(0.52 0.14 255)"
+                    strokeWidth={2}
+                    dot={false}
+                    name="311 encampment reports"
+                    connectNulls={false}
+                  />
+                ) : null}
                 {showHudBenchmark ? (
                   <>
                     <Line
                       type="linear"
                       dataKey="sanDiegoPre"
                       yAxisId="right"
-                      stroke="oklch(0.52 0.14 255)"
+                      stroke="oklch(0.58 0.19 25)"
                       strokeWidth={2}
                       dot={{ r: 2.5 }}
                       connectNulls
@@ -862,7 +952,7 @@ export function OrgInsightsPanel({
                       type="linear"
                       dataKey="sanDiegoPost"
                       yAxisId="right"
-                      stroke="oklch(0.52 0.14 255)"
+                      stroke="oklch(0.58 0.19 25)"
                       strokeWidth={2}
                       dot={{ r: 2.5 }}
                       connectNulls
@@ -905,17 +995,24 @@ export function OrgInsightsPanel({
             <p className="mt-3 text-sm text-muted-foreground">
               {formatMonthLabel(activePoint.date)}:{" "}
               <span className="font-medium text-foreground">
-                {Math.round(activePoint.value)} people
+                {Math.round(activePoint.value)} people{" "}
+                {activePoint.kind === "forecast" ? "predicted" : "observed"} (PIT)
               </span>
               {activePoint.kind === "forecast" ? (
                 <>
                   {" "}
-                  predicted (band {Math.round(activePoint.lower)}–
+                  (band {Math.round(activePoint.lower)}–
                   {Math.round(activePoint.upper)})
                 </>
-              ) : (
-                <> observed</>
-              )}
+              ) : null}
+              {activeEncampmentReports !== null ? (
+                <>
+                  {" · "}
+                  <span className="font-medium text-foreground">
+                    {activeEncampmentReports.toLocaleString()} encampment reports (311)
+                  </span>
+                </>
+              ) : null}
             </p>
           ) : null}
           {showHudBenchmark && hudBenchmark ? (

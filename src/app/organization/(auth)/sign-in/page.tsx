@@ -27,7 +27,6 @@ export default async function OrganizationSignInPage({
   return (
     <AuthFrame
       title="Sign in as an organization"
-      description="Use the email and password from your application. If you were approved, this opens the dashboard."
     >
       {params.expired ? (
         <p className="mb-4 rounded-lg bg-card px-3 py-2 text-sm ring-1 ring-foreground/10">

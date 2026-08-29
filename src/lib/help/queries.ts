@@ -12,7 +12,7 @@ import {
   initialsFromName,
   serviceLabels,
 } from "@/lib/services";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type {
   Profile,
   RequestStatus,
@@ -234,6 +234,10 @@ export async function getOwnedOrganization(
 
 const loadOwnedOrganization = cache(
   async (profileId: string): Promise<OwnedOrganization | null> => {
+    if (!isSupabaseConfigured()) {
+      return null;
+    }
+
     const supabase = await createClient();
 
     if (isDemoOrganizationId(profileId)) {
@@ -259,6 +263,12 @@ const loadOwnedOrganization = cache(
 );
 
 export async function listDirectoryOrganizations(need?: ServiceKind) {
+  if (!isSupabaseConfigured()) {
+    return need
+      ? FALLBACK_DIRECTORY_ORGANIZATIONS.filter((org) => org.services.includes(need))
+      : FALLBACK_DIRECTORY_ORGANIZATIONS;
+  }
+
   const supabase = await createClient();
   let query = supabase
     .from("organizations")
@@ -296,6 +306,10 @@ export function toHelpOrganization(
   };
 }
 
+export function isFallbackOrganization(organizationId: string): DirectoryOrganization | null {
+  return FALLBACK_DIRECTORY_ORGANIZATIONS.find((org) => org.id === organizationId) ?? null;
+}
+
 export async function listIncomingRequests(
   organizationId: string,
   services: ServiceKind[],
@@ -304,13 +318,16 @@ export async function listIncomingRequests(
     return [];
   }
 
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("help_requests")
-    .select("id, participant_name, need, note, status, created_at")
-    .eq("organization_id", organizationId)
-    .in("need", services)
-    .order("created_at", { ascending: false });
+  const data = isSupabaseConfigured()
+    ? (
+        await (await createClient())
+          .from("help_requests")
+          .select("id, participant_name, need, note, status, created_at")
+          .eq("organization_id", organizationId)
+          .in("need", services)
+          .order("created_at", { ascending: false })
+      ).data
+    : null;
 
   const fromDb = (data ?? []).map((request) => ({
     id: request.id,
@@ -372,6 +389,10 @@ export async function listParticipantConnections(participantId: string) {
       }));
   }
 
+  if (!isSupabaseConfigured()) {
+    return [];
+  }
+
   const supabase = await createClient();
   const { data } = await supabase
     .from("help_requests")
@@ -403,12 +424,15 @@ export async function listParticipantConnections(participantId: string) {
 }
 
 export async function countPendingRequests(organizationId: string) {
-  const supabase = await createClient();
-  const { count } = await supabase
-    .from("help_requests")
-    .select("id", { count: "exact", head: true })
-    .eq("organization_id", organizationId)
-    .eq("status", "pending");
+  const count = isSupabaseConfigured()
+    ? (
+        await (await createClient())
+          .from("help_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", organizationId)
+          .eq("status", "pending")
+      ).count
+    : null;
 
   const demoPending = (await readDemoRequests("organization")).filter(
     (request) =>

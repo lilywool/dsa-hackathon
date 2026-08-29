@@ -23,11 +23,14 @@ const CARE_ASSESS_POP: Pop = {
       type: PopComponentType.INFERENCE,
       inferenceTypes: [InferenceType.IMAGE_CLASSIFICATION],
       abilityUuid: "06a92704813778ac80001c5f8f8e715e",
+      // tags each result so we can match it, since components can resolve out of order
+      categoryName: "jaundice",
     },
     {
       type: PopComponentType.INFERENCE,
       inferenceTypes: [InferenceType.IMAGE_CLASSIFICATION],
       abilityUuid: "06a926a7eb28747080002b19e5ca3106",
+      categoryName: "wound",
     },
   ],
 };

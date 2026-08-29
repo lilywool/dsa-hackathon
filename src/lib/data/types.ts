@@ -69,6 +69,10 @@ export type GetItDoneEncampmentTrend = {
     "2025": string;
   };
   years: GetItDoneEncampmentTrendYear[];
+  months: Array<{
+    month: string;
+    attributed_to_block: number;
+  }>;
 };
 
 export type ServiceLocationProps = {

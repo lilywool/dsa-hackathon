@@ -3,6 +3,13 @@ import { cookies } from "next/headers";
 
 import type { Database } from "@/lib/supabase/database.types";
 
+/** True once real Supabase credentials replace the placeholder values in .env.local. */
+export function isSupabaseConfigured() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  return Boolean(url && key && !url.includes("your-project") && !key.includes("your-publishable-key"));
+}
+
 export async function createClient() {
   const cookieStore = await cookies();
 

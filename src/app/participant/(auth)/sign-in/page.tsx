@@ -23,7 +23,6 @@ export default async function ParticipantSignInPage({
   return (
     <AuthFrame
       title="Sign in as a participant"
-      description="Use the email and password you created. This opens the help-finding dashboard."
     >
       {params.expired ? (
         <p className="mb-4 rounded-lg bg-card px-3 py-2 text-sm ring-1 ring-foreground/10">

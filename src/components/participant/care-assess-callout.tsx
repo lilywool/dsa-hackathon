@@ -34,9 +34,11 @@ export function CareAssessCallout() {
   const [pending, startTransition] = useTransition();
   const [selectedId, setSelectedId] = useState<CareAssessImageId | null>(null);
   const [selectedUpload, setSelectedUpload] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [result, setResult] = useState<CareAssessResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const responseRef = useRef<HTMLDivElement>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (pending || result || error) {
@@ -44,12 +46,31 @@ export function CareAssessCallout() {
     }
   }, [pending, result, error]);
 
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+    };
+  }, []);
+
+  function clearPreviousPreview() {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  }
+
   function onSelect(imageId: CareAssessImageId) {
+    const image = careAssessDemoImages.find((entry) => entry.id === imageId);
+
     setPickerOpen(false);
     setSelectedId(imageId);
     setSelectedUpload(false);
     setError(null);
     setResult(null);
+    clearPreviousPreview();
+    setPreviewUrl(image?.publicPath ?? null);
 
     startTransition(async () => {
       const response = await runCareAssess(imageId);
@@ -77,6 +98,10 @@ export function CareAssessCallout() {
     setSelectedUpload(true);
     setError(null);
     setResult(null);
+    clearPreviousPreview();
+    const objectUrl = URL.createObjectURL(file);
+    objectUrlRef.current = objectUrl;
+    setPreviewUrl(objectUrl);
 
     const formData = new FormData();
     formData.set("image", file);
@@ -144,12 +169,12 @@ export function CareAssessCallout() {
                 onClick={() => onSelect(image.id)}
                 className="overflow-hidden rounded-2xl bg-card text-left ring-1 ring-foreground/10 transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <div className="relative aspect-[4/3] bg-muted">
+                <div className="relative aspect-[4/3] bg-muted/40 p-2 flex items-center justify-center">
                   <Image
                     src={image.publicPath}
                     alt={image.description}
                     fill
-                    className="object-cover"
+                    className="object-contain p-1"
                     sizes="(max-width: 640px) 100vw, 280px"
                   />
                 </div>
@@ -181,6 +206,17 @@ export function CareAssessCallout() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {previewUrl ? (
+        <div className="mx-auto flex max-w-48 w-full items-center justify-center overflow-hidden rounded-2xl bg-muted/40 p-2.5 ring-1 ring-foreground/10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={previewUrl}
+            alt="Selected picture for care assessment"
+            className="h-auto max-h-48 w-auto max-w-full rounded-xl object-contain shadow-sm"
+          />
+        </div>
+      ) : null}
 
       {pending ? (
         <div

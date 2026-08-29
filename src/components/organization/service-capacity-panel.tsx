@@ -5,7 +5,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   Label,
   ResponsiveContainer,
   Tooltip,
@@ -61,16 +60,13 @@ const statusStyles: Record<AvailabilityStatus, string> = {
   unknown: "bg-muted text-muted-foreground ring-foreground/10",
 };
 
-const barFillByStatus: Record<AvailabilityStatus, string> = {
-  available: "oklch(0.45 0.08 175)",
-  limited: "oklch(0.62 0.12 75)",
-  at_capacity: "oklch(0.55 0.14 25)",
-  unknown: "oklch(0.72 0.02 80)",
-};
-
 const FOOD_PANTRY_ORG_KEYS = new Set([
   "feeding-san-diego",
   "jacobs-cushman-san-diego-food-bank",
+]);
+
+const EXCLUDED_FOOD_CHART_ORG_KEYS = new Set([
+  "new-day-urban-ministries",
 ]);
 
 function confidenceLabel(level: CapacityConfidence) {
@@ -101,8 +97,8 @@ function ServiceCapacityTable({
           <tr>
             <th className="px-3 py-2.5 font-medium">Organization</th>
             <th className="px-3 py-2.5 font-medium">Live capacity</th>
-            <th className="px-3 py-2.5 font-medium">Simulated need</th>
-            <th className="px-3 py-2.5 font-medium">Open now</th>
+            <th className="px-3 py-2.5 font-medium">Estimated demand</th>
+            <th className="px-3 py-2.5 font-medium">Estimated vacancies</th>
             <th className="px-3 py-2.5 font-medium">Status</th>
             <th className="px-3 py-2.5 font-medium">Confidence</th>
           </tr>
@@ -226,9 +222,8 @@ function ServiceCapacityChart({
           name: shortOrgLabel(row.organization),
           fullName: row.organization,
           capacity: row.displayTotal,
-          open: row.displayVacancies ?? 0,
-          need: row.displayNeed,
-          status: row.status,
+          vacancies: row.displayVacancies ?? 0,
+          demand: row.displayNeed,
           unit: row.displayUnit,
         })),
     [organizationFilter, rows],
@@ -255,11 +250,11 @@ function ServiceCapacityChart({
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-5 rounded-sm bg-primary" />
-          Open now
+          Vacancies
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-5 rounded-sm bg-[oklch(0.55_0.06_250)]/60" />
-          Simulated need
+          Demand
         </span>
       </div>
       <div className="h-72">
@@ -301,13 +296,7 @@ function ServiceCapacityChart({
                   typeof value === "number" ? value : Number(value ?? 0);
                 const unit =
                   (item?.payload as { unit?: string } | undefined)?.unit ?? "";
-                const label =
-                  name === "open"
-                    ? "Open now"
-                    : name === "need"
-                      ? "Need"
-                      : "Capacity";
-                return [`${formatCapacityValue(numeric)} ${unit}`, label];
+                return [`${formatCapacityValue(numeric)} ${unit}`, String(name)];
               }}
               labelFormatter={(_, payload) => {
                 const first = payload?.[0]?.payload as
@@ -316,32 +305,26 @@ function ServiceCapacityChart({
                 return first?.fullName ?? "";
               }}
             />
-            <Bar dataKey="capacity" name="Capacity" radius={[4, 4, 0, 0]}>
-              {data.map((entry) => (
-                <Cell
-                  key={`cap-${entry.fullName}`}
-                  fill={barFillByStatus[entry.status]}
-                  fillOpacity={0.35}
-                />
-              ))}
-            </Bar>
-            <Bar dataKey="open" name="Open now" radius={[4, 4, 0, 0]}>
-              {data.map((entry) => (
-                <Cell
-                  key={`open-${entry.fullName}`}
-                  fill={barFillByStatus[entry.status]}
-                />
-              ))}
-            </Bar>
-            <Bar dataKey="need" name="Need" radius={[4, 4, 0, 0]}>
-              {data.map((entry) => (
-                <Cell
-                  key={`need-${entry.fullName}`}
-                  fill="oklch(0.55 0.06 250)"
-                  fillOpacity={0.55}
-                />
-              ))}
-            </Bar>
+            <Bar
+              dataKey="capacity"
+              name="Capacity"
+              fill="oklch(0.45 0.08 175)"
+              fillOpacity={0.35}
+              radius={[4, 4, 0, 0]}
+            />
+            <Bar
+              dataKey="vacancies"
+              name="Vacancies"
+              fill="oklch(0.45 0.08 175)"
+              radius={[4, 4, 0, 0]}
+            />
+            <Bar
+              dataKey="demand"
+              name="Demand"
+              fill="oklch(0.55 0.06 250)"
+              fillOpacity={0.55}
+              radius={[4, 4, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -373,14 +356,14 @@ function ReferralCallout({
     return (
       <div className="rounded-xl bg-primary/8 px-4 py-3 text-sm ring-1 ring-primary/15">
         <p className="font-medium text-foreground">
-          Referral options with open capacity
+          Referral options with vacancies
         </p>
         <p className="mt-1 text-muted-foreground">
           {peers
             .slice(0, 4)
             .map(
               (row) =>
-                `${row.organization} (${formatVacancyLabel(row)} ${row.displayUnit})`,
+                `${row.organization} (${formatVacancyLabel(row)})`,
             )
             .join(" · ")}
           {peers.length > 4 ? ` · +${peers.length - 4} more` : ""}
@@ -406,18 +389,18 @@ function ReferralCallout({
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="h-2.5 w-5 rounded-sm bg-primary" />
-              Open now
+              Estimated vacancies
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="h-2.5 w-5 rounded-sm bg-[oklch(0.55_0.06_250)]/60" />
-              Simulated need
+              Estimated demand
             </span>
           </div>
         {peers
           .slice(0, 4)
           .map(
             (row) =>
-              `${row.organization} (${formatVacancyLabel(row)} ${row.displayUnit})`,
+              `${row.organization} (${formatVacancyLabel(row)})`,
           )
           .join(" · ")}
         {peers.length > 4 ? ` · +${peers.length - 4} more` : ""}
@@ -586,23 +569,24 @@ export function ServiceCapacityPanel({
                   <div className="grid gap-4 xl:grid-cols-2">
                     <ServiceCapacityChart
                       rows={foodPantryRows}
-                      title="Food pantry capacity"
+                      title="Capacity vs Vacancies vs Demand"
                       organizationFilter={(row) =>
                         FOOD_PANTRY_ORG_KEYS.has(row.org_key)
                       }
                     />
                     <ServiceCapacityChart
                       rows={warmMealRows}
-                      title="Warm meals capacity"
+                      title="Capacity vs Vacancies vs Demand"
                       organizationFilter={(row) =>
-                        !FOOD_PANTRY_ORG_KEYS.has(row.org_key)
+                        !FOOD_PANTRY_ORG_KEYS.has(row.org_key) &&
+                        !EXCLUDED_FOOD_CHART_ORG_KEYS.has(row.org_key)
                       }
                     />
                   </div>
                 ) : (
                   <>
                     <p className="mb-2 text-sm font-medium">
-                      Capacity vs open slots vs need
+                      Capacity vs Vacancies vs Demand
                     </p>
                     <ServiceCapacityChart rows={activeRows} />
                   </>

@@ -39,5 +39,5 @@ export function needColorScale(value: number, max: number) {
 }
 
 /** Downtown San Diego core — keep the insights map framed here. */
-export const DOWNTOWN_CENTER: [number, number] = [32.7157, -117.1611];
-export const DOWNTOWN_DEFAULT_ZOOM = 15;
+export const DOWNTOWN_CENTER: [number, number] = [32.7145, -117.1611];
+export const DOWNTOWN_DEFAULT_ZOOM = 14.72;

@@ -83,7 +83,7 @@ async function setDemoRole(role: DemoRole | null, email?: string) {
 async function completeDemoSignIn(role: DemoRole, email: string): Promise<never> {
   try {
     const supabase = await createClient();
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
   } catch {
     // Auth may be down; demo login should still open the dashboard.
   }

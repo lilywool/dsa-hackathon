@@ -9,8 +9,9 @@ import {
   isDemoRequestId,
   updateDemoHelpRequestStatus,
 } from "@/lib/help/demo-store";
+import { isFallbackOrganization } from "@/lib/help/queries";
 import { isServiceKind } from "@/lib/services";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { RequestStatus } from "@/lib/supabase/database.types";
 
 export type HelpState = { error: string | null; asked: boolean };
@@ -45,14 +46,25 @@ export async function askForHelp(
     return { error: "Sign in as a participant to ask for help.", asked: false };
   }
 
-  const supabase = await createClient();
-  const { data: organization, error: organizationError } = await supabase
-    .from("organizations")
-    .select("id, name, services")
-    .eq("id", organizationId)
-    .maybeSingle();
+  // Check for fallback organization first (for demo)
+  const fallbackOrg = isFallbackOrganization(organizationId);
+  const organization = fallbackOrg || { id: organizationId, name: "", services: [] as any[] };
 
-  if (organizationError || !organization) {
+  if (!fallbackOrg && isSupabaseConfigured()) {
+    // Only query Supabase if not a fallback org
+    const supabase = await createClient();
+    const { data: dbOrg, error: organizationError } = await supabase
+      .from("organizations")
+      .select("id, name, services")
+      .eq("id", organizationId)
+      .maybeSingle();
+
+    if (organizationError || !dbOrg) {
+      return { error: "That organization could not be found.", asked: false };
+    }
+
+    Object.assign(organization, dbOrg);
+  } else if (!fallbackOrg) {
     return { error: "That organization could not be found.", asked: false };
   }
 
@@ -75,6 +87,7 @@ export async function askForHelp(
     return { error: null, asked: true };
   }
 
+  const supabase = await createClient();
   const { error } = await supabase.from("help_requests").insert({
     organization_id: organizationId,
     participant_id: profile.id,

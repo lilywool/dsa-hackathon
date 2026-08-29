@@ -50,6 +50,7 @@ type Props = {
   pitByBlock: Map<string, BlockPitEntry>;
   maxPitValue: number;
   selectedNeighborhood: string;
+  outlineMode: "selected" | "all" | "none";
   excludeNoPanel: boolean;
   onSelectNeighborhood: (neighborhood: string) => void;
   capacitySites?: CapacitySiteMarker[];
@@ -60,10 +61,18 @@ type Props = {
   serviceFilter: ServiceKind;
 };
 
+const DOWNTOWN_BLOCK_BOUNDS: [[number, number], [number, number]] = [
+  [32.7015, -117.1712],
+  [32.724, -117.1438],
+];
+
 function FitDowntown() {
   const map = useMap();
   useEffect(() => {
-    map.setView(DOWNTOWN_CENTER, DOWNTOWN_DEFAULT_ZOOM);
+    map.fitBounds(DOWNTOWN_BLOCK_BOUNDS, {
+      maxZoom: DOWNTOWN_DEFAULT_ZOOM,
+      padding: [12, 12],
+    });
   }, [map]);
   return null;
 }
@@ -278,6 +287,7 @@ export function ForecastChoropleth({
   pitByBlock,
   maxPitValue,
   selectedNeighborhood,
+  outlineMode,
   excludeNoPanel,
   onSelectNeighborhood,
   capacitySites = [],
@@ -348,9 +358,9 @@ export function ForecastChoropleth({
       return {
         fillColor: "#94a3b8",
         fillOpacity: 0.12,
-        color: "#64748b",
-        weight: 0.5,
-        dashArray: "3 2",
+        color: outlineMode === "none" ? "transparent" : "#64748b",
+        weight: outlineMode === "none" ? 0 : 0.5,
+        dashArray: outlineMode === "none" ? undefined : "3 2",
       } satisfies PathOptions;
     }
 
@@ -364,8 +374,18 @@ export function ForecastChoropleth({
     return {
       fillColor: needColorScale(entry.value, pitMax),
       fillOpacity: entry.source === "none" ? 0.2 : selected ? 0.72 : 0.55,
-      color: selected ? "#0f172a" : "#475569",
-      weight: selected ? 1.4 : 0.35,
+      color:
+        outlineMode === "none"
+          ? "transparent"
+          : outlineMode === "all" || selected
+            ? "#0f172a"
+            : "#475569",
+      weight:
+        outlineMode === "none"
+          ? 0
+          : outlineMode === "all" || selected
+            ? 1.4
+            : 0.35,
     } satisfies PathOptions;
   };
 
@@ -377,12 +397,23 @@ export function ForecastChoropleth({
       return {};
     }
     const value = reportValues.get(props.block_id) ?? props.total_reports;
-    const selected = props.neighborhood === selectedNeighborhood;
+    const selected =
+      neighborhoodForecastKey(props.neighborhood) === selectedNeighborhood;
     return {
       fillColor: encampmentColorScale(value, maxReportValue),
       fillOpacity: selected ? 0.78 : 0.62,
-      color: selected ? "#172554" : "#1d4ed8",
-      weight: selected ? 1.4 : 0.5,
+      color:
+        outlineMode === "none"
+          ? "transparent"
+          : outlineMode === "all" || selected
+            ? "#172554"
+            : "#1d4ed8",
+      weight:
+        outlineMode === "none"
+          ? 0
+          : outlineMode === "all" || selected
+            ? 1.4
+            : 0.5,
     } satisfies PathOptions;
   };
 
@@ -455,6 +486,7 @@ export function ForecastChoropleth({
           key="org-insights-downtown-map"
           center={DOWNTOWN_CENTER}
           zoom={DOWNTOWN_DEFAULT_ZOOM}
+          zoomSnap={0.01}
           scrollWheelZoom={false}
           className="h-[480px] w-full z-0"
           attributionControl

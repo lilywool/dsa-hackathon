@@ -393,9 +393,9 @@ export function formatVacancyLabel(row: CapacityAvailabilityRow) {
     return "—";
   }
   if (row.status === "at_capacity") {
-    return "0 open";
+    return "0 vacancies";
   }
-  return `${formatCapacityValue(row.displayVacancies)} open`;
+  return `${formatCapacityValue(row.displayVacancies)} vacancies`;
 }
 
 export function shortOrgLabel(name: string, max = 22) {

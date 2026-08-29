@@ -140,13 +140,19 @@ export function summarizeCarePredictions(
   const items = collectTexts(predictions);
   const findings: CareFinding[] = [];
 
-  const jaundiceItem =
-    items.find((i) => i.category && normalize(i.category).includes("jaundice")) ??
-    items[0];
+  const hasCategories = items.some((i) => i.category);
 
-  const woundItem =
-    items.find((i) => i.category && normalize(i.category).includes("wound")) ??
-    (items.length >= 2 ? items[1] : items[0]);
+  // Component completion order isn't guaranteed, so match by category when
+  // available. Only fall back to array position if no result carries one.
+  const jaundiceItem = hasCategories
+    ? items.find((i) => i.category && normalize(i.category).includes("jaundice"))
+    : items[0];
+
+  const woundItem = hasCategories
+    ? items.find((i) => i.category && normalize(i.category).includes("wound"))
+    : items.length >= 2
+      ? items[1]
+      : items[0];
 
   if (jaundiceItem) {
     const detected = isStringTrue(jaundiceItem.text);
