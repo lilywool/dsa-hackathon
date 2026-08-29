@@ -61,6 +61,171 @@ export type IncomingRequest = {
   status: RequestStatus;
 };
 
+const FALLBACK_DIRECTORY_ORGANIZATIONS: DirectoryOrganization[] = [
+  {
+    id: "SD-FATHER-JOES-VILLAGES",
+    name: "Father Joe's Villages",
+    location: "3350 E St, San Diego, CA 92102",
+    services: ["shelter", "food", "healthcare", "employment", "clothing", "other"],
+    website: "https://my.neighbor.org/",
+    phone: "800-466-3537",
+    notes: "Large homelessness-services provider. Shelter/housing navigation, meals, Village Health Center, employment services, showers/mail/storage and other basic-needs services.",
+  },
+  {
+    id: "SD-ALPHA-PROJECT-FOR-THE-HOMELESS",
+    name: "Alpha Project for the Homeless",
+    location: "3737 Fifth Ave, Suite 203, San Diego, CA 92103",
+    services: ["shelter", "food", "employment", "clothing", "other"],
+    website: "https://alphaproject.org/",
+    phone: "619-542-1877",
+    notes: "Emergency/bridge and family shelters, food support, transitional employment through Take Back the Streets, supportive services and clothing support.",
+  },
+  {
+    id: "SD-SAN-DIEGO-RESCUE-MISSION",
+    name: "San Diego Rescue Mission",
+    location: "120 Elm St, San Diego, CA 92101",
+    services: ["shelter", "food", "healthcare", "employment", "clothing", "other"],
+    website: "https://www.sdrescue.org/",
+    phone: "619-687-3720",
+    notes: "Emergency shelter, residential recovery, meals, clothing/necessities, wellness/medical-dental connections, education and employment/housing support.",
+  },
+  {
+    id: "SD-THIRD-AVENUE-CHARITABLE-ORGANIZATION-TACO",
+    name: "Third Avenue Charitable Organization (TACO)",
+    location: "1420 Third Ave, San Diego, CA 92101",
+    services: ["food", "healthcare", "clothing", "other"],
+    website: "https://www.tacosd.org/",
+    phone: "619-235-9445",
+    notes: "Serves people experiencing homelessness and poverty with warm meals, clothing, device charging, mail services, help recovering ID documents, and a free medical/pharmacy clinic.",
+  },
+  {
+    id: "SD-YOUTH-ASSISTANCE-COALITION",
+    name: "Youth Assistance Coalition",
+    location: "2801 B St #238, San Diego, CA 92102",
+    services: ["shelter", "food", "healthcare", "employment", "clothing", "other"],
+    website: "https://www.yacsd.org/",
+    phone: "619-458-6588",
+    notes: "Focused on youth experiencing homelessness. Provides or connects youth to meals, clothing/bedding, housing/shelter, health, counseling, job training, education.",
+  },
+  {
+    id: "SD-INTERFAITH-COMMUNITY-SERVICES",
+    name: "Interfaith Community Services",
+    location: "550 W Washington Ave, Escondido, CA 92025",
+    services: ["shelter", "food", "healthcare", "employment", "other"],
+    website: "https://www.interfaithservices.org/",
+    phone: "760-489-6380",
+    notes: "North County provider offering shelter/housing, emergency food/basic needs, employment/economic development, behavioral health/substance-use services.",
+  },
+  {
+    id: "SD-COMMUNITY-CHRISTIAN-SERVICE-AGENCY-CCSA",
+    name: "Community Christian Service Agency (CCSA)",
+    location: "4167 Rappahannock Ave, San Diego, CA 92117",
+    services: ["shelter", "food", "healthcare", "clothing", "other"],
+    website: "https://www.ccsasandiego.org/",
+    phone: "858-274-2271",
+    notes: "Emergency food and clothing, temporary housing/emergency shelter referrals, transportation help, ID/birth certificate assistance, resource counseling.",
+  },
+  {
+    id: "SD-NEW-DAY-URBAN-MINISTRIES",
+    name: "New Day Urban Ministries",
+    location: "2459 Market St, San Diego, CA 92102",
+    services: ["food", "clothing", "other"],
+    website: "https://newdayurbanministries.org/",
+    phone: "619-232-2753",
+    notes: "Basic-needs support for people experiencing homelessness and poverty, including groceries/food, clothing, hygiene kits, casework and resource support.",
+  },
+  {
+    id: "SD-SHARIAS-CLOSET",
+    name: "Sharia's Closet",
+    location: "6244 El Cajon Blvd, Suite 5, San Diego, CA 92115",
+    services: ["clothing", "other"],
+    website: "https://shariascloset.org/",
+    phone: "619-808-4979",
+    notes: "Free emergency clothing and hygiene items for individuals and families in crisis. Personalized Bags of Hope.",
+  },
+  {
+    id: "SD-FEEDING-SAN-DIEGO",
+    name: "Feeding San Diego",
+    location: "9477 Waples St, Suite 100, San Diego, CA 92121",
+    services: ["food", "other"],
+    website: "https://feedingsandiego.org/",
+    phone: "858-452-3663",
+    notes: "Countywide hunger-relief and food-rescue nonprofit. Offers free food distributions, an on-site Marketplace, partner food sites, and CalFresh application assistance.",
+  },
+  {
+    id: "SD-JACOBS-CUSHMAN-SAN-DIEGO-FOOD-BANK",
+    name: "Jacobs & Cushman San Diego Food Bank",
+    location: "9850 Distribution Ave, San Diego, CA 92121",
+    services: ["food", "other"],
+    website: "https://www.sandiegofoodbank.org/",
+    phone: "858-527-1419",
+    notes: "Major countywide food bank. Connects individuals to partner distributions and supports CalFresh outreach.",
+  },
+  {
+    id: "SD-SAN-DIEGO-HUNGER-COALITION",
+    name: "San Diego Hunger Coalition",
+    location: "845 15th St, Suite 103, San Diego, CA 92101",
+    services: ["food", "other"],
+    website: "https://www.sdhunger.org/",
+    phone: "619-501-7917",
+    notes: "Food-access organization focused on connecting people and systems to food assistance through research, education, advocacy and resource navigation.",
+  },
+  {
+    id: "SD-FAMILY-HEALTH-CENTERS-OF-SAN-DIEGO",
+    name: "Family Health Centers of San Diego",
+    location: "Multiple San Diego County locations",
+    services: ["food", "healthcare", "employment", "other"],
+    website: "https://www.fhcsd.org/",
+    phone: "619-515-2300",
+    notes: "Community health network serving people experiencing homelessness; medical, dental, behavioral health, benefits enrollment and case-management/referral services.",
+  },
+  {
+    id: "SD-SAN-YSIDRO-HEALTH",
+    name: "San Ysidro Health",
+    location: "Multiple San Diego County locations",
+    services: ["healthcare", "other"],
+    website: "https://www.syhealth.org/",
+    phone: "619-662-4100",
+    notes: "Community health provider offering accessible primary and specialty care, dental, pharmacy and other services.",
+  },
+  {
+    id: "SD-SAN-DIEGO-AMERICAN-INDIAN-HEALTH-CENTER",
+    name: "San Diego American Indian Health Center",
+    location: "2630 First Ave, San Diego, CA 92103",
+    services: ["healthcare", "other"],
+    website: "https://www.sdaihc.org/",
+    phone: "619-234-2158",
+    notes: "Community health center providing medical, dental, behavioral health and wellness services for all people; IHS-funded and FQHC.",
+  },
+  {
+    id: "SD-SAN-DIEGO-WORKFORCE-PARTNERSHIP",
+    name: "San Diego Workforce Partnership",
+    location: "Career centers throughout San Diego County",
+    services: ["employment", "other"],
+    website: "https://workforce.org/",
+    phone: "619-319-9675",
+    notes: "Free job-search, career-development, training, apprenticeship and employment programs for San Diego County job seekers.",
+  },
+  {
+    id: "SD-THE-HUB---HOMELESSNESS-RESPONSE-CENTER",
+    name: "The Hub - Homelessness Response Center",
+    location: "San Diego, CA",
+    services: ["shelter", "food", "healthcare", "employment", "clothing", "other"],
+    website: "https://www.sandiego.gov/homelessness-strategies-and-solutions/services/homelessness-response-center",
+    phone: "211",
+    notes: "System-navigation hub connecting unhoused individuals and families to housing/shelter, employment readiness, basic-needs assistance, case management and community resources.",
+  },
+  {
+    id: "SD-2-1-1-SAN-DIEGO",
+    name: "2-1-1 San Diego",
+    location: "San Diego County, CA",
+    services: ["shelter", "food", "healthcare", "employment", "clothing", "other"],
+    website: "https://211sandiego.org/",
+    phone: "211",
+    notes: "Countywide information and referral system. Useful as a fallback/router for shelter, food, health, employment, clothing and other social services.",
+  },
+];
+
 export async function getOwnedOrganization(
   profile: Profile,
 ): Promise<OwnedOrganization | null> {
@@ -105,7 +270,15 @@ export async function listDirectoryOrganizations(need?: ServiceKind) {
   }
 
   const { data } = await query;
-  return (data ?? []) as DirectoryOrganization[];
+  if (!data || data.length === 0) {
+    const fallback = need
+      ? FALLBACK_DIRECTORY_ORGANIZATIONS.filter((org) =>
+          org.services.includes(need),
+        )
+      : FALLBACK_DIRECTORY_ORGANIZATIONS;
+    return fallback;
+  }
+  return data as DirectoryOrganization[];
 }
 
 export function toHelpOrganization(

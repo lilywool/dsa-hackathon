@@ -1,6 +1,7 @@
 import path from "node:path";
 
-import EyePop, {
+import {
+  EyePop,
   InferenceType,
   PopComponentType,
   type Pop,
@@ -21,19 +22,12 @@ const CARE_ASSESS_POP: Pop = {
     {
       type: PopComponentType.INFERENCE,
       inferenceTypes: [InferenceType.IMAGE_CLASSIFICATION],
-      ability:
-        "ucsd-edu-malsaiari.image-classify.Jaundice-Classification---Face-and-Body---Aug-2026:latest",
-      categoryName:
-        "image-classify.Jaundice-Classification---Face-and-Body---Aug-2026",
-      confidenceThreshold: 0.7,
+      abilityUuid: "06a92704813778ac80001c5f8f8e715e",
     },
     {
       type: PopComponentType.INFERENCE,
       inferenceTypes: [InferenceType.IMAGE_CLASSIFICATION],
-      ability:
-        "ucsd-edu-malsaiari.image-classify.wound-triage-classification:latest",
-      categoryName: "image-classify.wound-triage-classification",
-      confidenceThreshold: 0.7,
+      abilityUuid: "06a926a7eb28747080002b19e5ca3106",
     },
   ],
 };
@@ -98,6 +92,8 @@ async function runEyePop(imagePath: string): Promise<PredictionLike[]> {
     for await (const prediction of results) {
       predictions.push(prediction as PredictionLike);
     }
+    console.log("=== RAW EYEPOP PREDICTIONS ===");
+    console.log(JSON.stringify(predictions, null, 2));
     return predictions;
   } finally {
     await endpoint.disconnect();

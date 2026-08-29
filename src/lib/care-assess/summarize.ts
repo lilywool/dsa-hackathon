@@ -18,55 +18,100 @@ export type PredictedClassLike = {
 
 export type PredictionLike = {
   classes?: PredictedClassLike[];
+  texts?: Array<{ text?: string; category?: string; confidence?: number }>;
+  labels?: Array<{ label?: string; text?: string; classLabel?: string; category?: string; confidence?: number } | string>;
   objects?: Array<
     PredictedClassLike & {
       classes?: PredictedClassLike[];
+      texts?: Array<{ text?: string; category?: string; confidence?: number }>;
+      labels?: Array<{ label?: string; text?: string; classLabel?: string; category?: string; confidence?: number } | string>;
     }
   >;
 };
-
-function flattenClasses(predictions: PredictionLike[]): PredictedClassLike[] {
-  const out: PredictedClassLike[] = [];
-  for (const prediction of predictions) {
-    for (const entry of prediction.classes ?? []) {
-      out.push(entry);
-    }
-    for (const object of prediction.objects ?? []) {
-      out.push(object);
-      for (const nested of object.classes ?? []) {
-        out.push(nested);
-      }
-    }
-  }
-  return out;
-}
 
 function normalize(value: string | undefined): string {
   return (value ?? "").toLowerCase().replace(/[_-]+/g, " ").trim();
 }
 
-function isNegativeLabel(label: string): boolean {
-  return (
-    /\b(none|no|negative|absent|healthy|clear|normal|not present)\b/.test(
-      label,
-    ) || label.includes("no jaundice") || label.includes("no wound")
-  );
+export function isStringTrue(text: string | undefined): boolean {
+  if (!text) return false;
+  const raw = text.trim().toUpperCase();
+  if (raw === "FALSE" || raw.includes("FALSE")) {
+    return false;
+  }
+  if (raw === "TRUE" || raw.includes("TRUE")) {
+    return true;
+  }
+  return false;
 }
 
-function pickBest(
-  entries: PredictedClassLike[],
-  match: (label: string, category: string) => boolean,
-): PredictedClassLike | null {
-  let best: PredictedClassLike | null = null;
-  for (const entry of entries) {
-    const label = normalize(entry.classLabel);
-    const category = normalize(entry.category);
-    if (!match(label, category)) continue;
-    if (!best || (entry.confidence ?? 0) > (best.confidence ?? 0)) {
-      best = entry;
+type ExtractedText = {
+  text: string;
+  confidence: number;
+  category?: string;
+};
+
+function collectTexts(predictions: PredictionLike[]): ExtractedText[] {
+  const items: ExtractedText[] = [];
+  for (const pred of predictions ?? []) {
+    if (pred.texts) {
+      for (const t of pred.texts) {
+        if (t.text) {
+          items.push({
+            text: t.text.trim(),
+            confidence: t.confidence ?? 0.9,
+            category: t.category,
+          });
+        }
+      }
+    }
+    if (pred.classes) {
+      for (const c of pred.classes) {
+        if (c.classLabel) {
+          items.push({
+            text: c.classLabel.trim(),
+            confidence: c.confidence ?? 0.9,
+            category: c.category,
+          });
+        }
+      }
+    }
+    if (pred.labels) {
+      for (const l of pred.labels) {
+        const str = typeof l === "string" ? l : l.label ?? l.classLabel ?? l.text;
+        if (str) {
+          items.push({
+            text: str.trim(),
+            confidence: typeof l === "object" ? l.confidence ?? 0.9 : 0.9,
+            category: typeof l === "object" ? l.category : undefined,
+          });
+        }
+      }
+    }
+    if (pred.objects) {
+      for (const obj of pred.objects) {
+        if (obj.classLabel) {
+          items.push({
+            text: obj.classLabel.trim(),
+            confidence: obj.confidence ?? 0.9,
+            category: obj.category,
+          });
+        }
+        if (obj.texts) {
+          for (const t of obj.texts) {
+            if (t.text) {
+              items.push({
+                text: t.text.trim(),
+                confidence: t.confidence ?? 0.9,
+                category: t.category,
+              });
+            }
+          }
+        }
+      }
     }
   }
-  return best;
+  return items;
 }
 
 function levelFromConfidence(confidence: number): string {
@@ -89,66 +134,51 @@ function woundNeed(level: string, negative: boolean): string {
   return "Clean gently and monitor; ask for supplies if needed";
 }
 
-function severityFromLabel(label: string, confidence: number): string {
-  if (/\b(severe|critical|high)\b/.test(label)) return "High";
-  if (/\b(moderate|medium)\b/.test(label)) return "Moderate";
-  if (/\b(mild|low|minor|superficial)\b/.test(label)) return "Low";
-  return levelFromConfidence(confidence);
-}
-
 export function summarizeCarePredictions(
   predictions: PredictionLike[],
 ): CareFinding[] {
-  const classes = flattenClasses(predictions);
+  const items = collectTexts(predictions);
   const findings: CareFinding[] = [];
 
-  const jaundice = pickBest(
-    classes,
-    (label, category) =>
-      category.includes("jaundice") || label.includes("jaundice"),
-  );
-  if (jaundice?.classLabel) {
-    const label = normalize(jaundice.classLabel);
-    const confidence = jaundice.confidence ?? 0;
-    const negative = isNegativeLabel(label);
-    const level = negative
-      ? "None"
-      : severityFromLabel(label, confidence);
-    findings.push({
-      kind: "jaundice",
-      detected: !negative,
-      label: jaundice.classLabel,
-      confidence,
-      level,
-      immediateNeed: jaundiceNeed(level, negative),
-    });
+  const jaundiceItem =
+    items.find((i) => i.category && normalize(i.category).includes("jaundice")) ??
+    items[0];
+
+  const woundItem =
+    items.find((i) => i.category && normalize(i.category).includes("wound")) ??
+    (items.length >= 2 ? items[1] : items[0]);
+
+  if (jaundiceItem) {
+    const detected = isStringTrue(jaundiceItem.text);
+    const confidence = jaundiceItem.confidence;
+    const level = detected ? levelFromConfidence(confidence) : "None";
+    if (detected) {
+      findings.push({
+        kind: "jaundice",
+        detected: true,
+        label: jaundiceItem.text,
+        confidence,
+        level,
+        immediateNeed: jaundiceNeed(level, false),
+      });
+    }
   }
 
-  const wound = pickBest(
-    classes,
-    (label, category) =>
-      category.includes("wound") ||
-      label.includes("wound") ||
-      label.includes("abrasion") ||
-      label.includes("laceration") ||
-      label.includes("scratch"),
-  );
-  if (wound?.classLabel) {
-    const label = normalize(wound.classLabel);
-    const confidence = wound.confidence ?? 0;
-    const negative = isNegativeLabel(label);
-    const severity = negative
-      ? "None"
-      : severityFromLabel(label, confidence);
-    findings.push({
-      kind: "wound",
-      detected: !negative,
-      label: wound.classLabel,
-      confidence,
-      level: severity,
-      severity,
-      immediateNeed: woundNeed(severity, negative),
-    });
+  if (woundItem && (items.length >= 2 || woundItem !== jaundiceItem || items[0]?.category?.includes("wound"))) {
+    const detected = isStringTrue(woundItem.text);
+    const confidence = woundItem.confidence;
+    const level = detected ? levelFromConfidence(confidence) : "None";
+    if (detected) {
+      findings.push({
+        kind: "wound",
+        detected: true,
+        label: woundItem.text,
+        confidence,
+        level,
+        severity: level,
+        immediateNeed: woundNeed(level, false),
+      });
+    }
   }
 
   return findings;
