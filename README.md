@@ -41,7 +41,7 @@ hackathon by:
   dashboard; UI work in both the upstream repo and this fork; capacity
   research
 
-## Scope: what's real vs. vision
+## Scope: 
 
 **Live today:** the analytics and targeting layer, meaning the block-level
 need heatmap, neighborhood trends, and the org capacity dashboard, all built
@@ -65,8 +65,7 @@ npm run dev
 ```
 
 Open http://localhost:3000. A demo mode lets you sign in without any
-backend configured; see `src/lib/auth/demo.ts`. Demo auth never hits
-Supabase.
+backend configured; see `src/lib/auth/demo.ts`.
 
 Editing `public/data/*.json` and not seeing changes? Clear the Next.js
 cache (`rm -rf .next`) and restart. `src/lib/data/load.ts` uses
