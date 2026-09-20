@@ -18,6 +18,20 @@ This fork ([commits](https://github.com/lilywool/dsa-hackathon/commits/main/))
 extends the original build's UI and data: location-aware resource discovery,
 researched organization capacity data, and a fuller demo workflow.
 
+## Demo
+
+[![Haven — 7 minute walkthrough](docs/demo-thumb.png)](https://youtu.be/vFCN_u-mtac)
+
+**[Watch the full walkthrough (7:04)](https://youtu.be/vFCN_u-mtac)** — the
+participant side (resource discovery and the EyePop care screening), then the
+organization dashboard: block-level need heatmap, Holt–Winters forecasting
+against the HUD Point-in-Time benchmark, and live capacity matching.
+
+<!-- For an inline player: open this file in the GitHub editor and drag
+     haven_demo_clip.mp4 into the text area. GitHub hosts it and inserts a URL
+     that renders as a video player. Committing the file and linking it by path
+     renders as a plain link instead. -->
+
 ## Team
 
 Built at the [Data Science Alliance](https://www.linkedin.com/company/data-science-alliance/)
